@@ -538,18 +538,11 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
               <div class="flex flex-col h-full">
                 <!-- Thumbnail Wrapper -->
                 <div class="relative aspect-video bg-muted/20 overflow-hidden cursor-pointer rounded-xl border border-border/50" @click="openFile(video.path)">
-                  <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                  <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   
                   <!-- Duration Badge -->
                   <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md text-[9px] font-black text-white tracking-widest border border-border/50 uppercase">
                     {{ formatDuration(video.duration) }}
-                  </div>
-
-                  <!-- Hover Overlay -->
-                  <div class="absolute inset-0 bg-primary/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div class="bg-primary text-primary-foreground p-3 rounded-full shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-300">
-                      <PlayCircle class="h-6 w-6" />
-                    </div>
                   </div>
                 </div>
 
@@ -620,7 +613,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
         <div v-else class="space-y-1.5">
           <div v-for="video in filteredVideos" :key="video.path" class="group flex items-center justify-between p-2 pl-3 pr-2 bg-card/40 hover:bg-muted/30 rounded-xl border border-border/50 transition-all duration-300">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="bg-primary/10 p-1.5 rounded-lg text-primary shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+              <div class="bg-primary/10 p-1.5 rounded-lg text-primary shrink-0 transition-all">
                 <PlayCircle class="h-3.5 w-3.5" />
               </div>
               <div class="min-w-0">

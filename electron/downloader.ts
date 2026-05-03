@@ -65,12 +65,15 @@ export class Downloader {
     const outputTemplate = `${outputDir}/${sanitizedTitle}.%(ext)s`
 
     const args = [
-      '--format', format,
       '--ffmpeg-location', ffmpegPath,
       '--output', outputTemplate,
       '--progress',
       '--newline'
     ]
+
+    if (format !== 'best') {
+      args.unshift('--format', format)
+    }
 
     if (subtitles) {
       args.push('--write-subs')
@@ -84,12 +87,16 @@ export class Downloader {
     // Capture the final filename
     let finalPath = ''
     try {
-      const getFilenameProcess = spawn(ytDlpPath, [
-        '--format', format,
+      const getFilenameArgs = [
         '--output', outputTemplate,
         '--get-filename',
         url
-      ])
+      ]
+      if (format !== 'best') {
+        getFilenameArgs.unshift('--format', format)
+      }
+      
+      const getFilenameProcess = spawn(ytDlpPath, getFilenameArgs)
       
       let filenameOutput = ''
       getFilenameProcess.stdout.on('data', (data) => {
