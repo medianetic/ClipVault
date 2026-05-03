@@ -122,7 +122,7 @@ function createWindow() {
 
   ipcMain.handle('get-store-value', (_event, key) => store.get(key))
   ipcMain.handle('set-store-value', (_event, key, value) => store.set(key, value))
-  ipcMain.handle('check-video-exists', (_event, title) => downloader.checkFileExists(title, store.get('downloadDir') as string))
+  ipcMain.handle('check-video-exists', (_event, title, format) => downloader.checkFileExists(title, store.get('downloadDir') as string, format))
   ipcMain.handle('open-external', (_event, url) => shell.openExternal(url))
   ipcMain.handle('open-file', (_event, filePath) => shell.openPath(filePath))
   ipcMain.handle('open-folder', (_event, filePath) => shell.showItemInFolder(filePath))
@@ -140,11 +140,15 @@ function createWindow() {
     try {
       const folder = dirPath || store.get('downloadDir') || app.getPath('downloads')
       const files = await fs.readdir(folder)
-      const videoExtensions = ['.mp4', '.mkv', '.webm', '.avi', '.mov', '.m4a', '.mp3']
+      const videoExtensions = ['.mp4', '.mkv', '.webm', '.avi', '.mov']
+      const audioExtensions = ['.m4a', '.mp3', '.wav', '.flac', '.ogg']
       
       const videoPromises = files.map(async (file) => {
         const ext = path.extname(file).toLowerCase()
-        if (videoExtensions.includes(ext)) {
+        const isVideo = videoExtensions.includes(ext)
+        const isAudio = audioExtensions.includes(ext)
+
+        if (isVideo || isAudio) {
           const fullPath = path.join(folder, file)
           const stats = await fs.stat(fullPath)
           
@@ -159,7 +163,8 @@ function createWindow() {
             size: stats.size,
             mtime: stats.mtime,
             thumbnail: thumb ? `thumb://${thumb}` : null,
-            duration: metadata?.duration || 0
+            duration: metadata?.duration || 0,
+            type: isVideo ? 'video' : 'audio'
           }
         }
         return null

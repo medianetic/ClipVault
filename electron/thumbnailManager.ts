@@ -23,6 +23,13 @@ export class ThumbnailManager {
   }
 
   async getThumbnail(videoPath: string): Promise<string | null> {
+    // Skip thumbnail generation for audio files
+    const audioExtensions = ['.mp3', '.m4a', '.wav', '.flac', '.ogg', '.aac', '.opus']
+    const ext = path.extname(videoPath).toLowerCase()
+    if (audioExtensions.includes(ext)) {
+      return null
+    }
+
     const thumbName = this.getThumbName(videoPath)
     const fullThumbPath = path.join(this.thumbPath, thumbName)
 

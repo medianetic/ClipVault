@@ -61,7 +61,10 @@ export class Downloader {
       }
     }
 
-    const sanitizedTitle = this.sanitizeFilename(displayTitle!)
+    let sanitizedTitle = this.sanitizeFilename(displayTitle!)
+    if (format === 'bestaudio') {
+      sanitizedTitle += '-audio-only'
+    }
     const outputTemplate = `${outputDir}/${sanitizedTitle}.%(ext)s`
 
     const args = [
@@ -72,7 +75,11 @@ export class Downloader {
     ]
 
     if (format !== 'best') {
-      args.unshift('--format', format)
+      if (format === 'bestaudio') {
+        args.push('--extract-audio', '--audio-format', 'mp3')
+      } else {
+        args.unshift('--format', format)
+      }
     }
 
     if (subtitles) {
@@ -93,7 +100,11 @@ export class Downloader {
         url
       ]
       if (format !== 'best') {
-        getFilenameArgs.unshift('--format', format)
+        if (format === 'bestaudio') {
+          getFilenameArgs.push('--extract-audio', '--audio-format', 'mp3')
+        } else {
+          getFilenameArgs.unshift('--format', format)
+        }
       }
       
       const getFilenameProcess = spawn(ytDlpPath, getFilenameArgs)
@@ -164,9 +175,12 @@ export class Downloader {
       .replace(/^_+|_+$/g, ''); // Trim leading/trailing underscores
   }
 
-  async checkFileExists(title: string, outputDir: string): Promise<boolean> {
+  async checkFileExists(title: string, outputDir: string, format?: string): Promise<boolean> {
     try {
-      const sanitizedTitle = this.sanitizeFilename(title)
+      let sanitizedTitle = this.sanitizeFilename(title)
+      if (format === 'bestaudio') {
+        sanitizedTitle += '-audio-only'
+      }
       const folder = outputDir || (new Store()).get('downloadDir') as string || app.getPath('downloads')
       const files = await fs.readdir(folder)
       // Check if any file starts with the sanitized title (ignoring extension for simplicity/safety)

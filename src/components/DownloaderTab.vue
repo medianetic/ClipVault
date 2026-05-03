@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { 
   Search, Download, Loader2, CheckCircle2, AlertCircle, Youtube, Languages, Settings2, 
-  PlayCircle, Folder, LayoutGrid, List, Trash2, ArrowUpDown, Clock, HardDrive, Filter, X
+  PlayCircle, Folder, LayoutGrid, List, Trash2, ArrowUpDown, Clock, HardDrive, Filter, X,
+  Music, Film
 } from 'lucide-vue-next'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { 
@@ -27,6 +28,7 @@ interface VideoItem {
   mtime: Date
   thumbnail?: string
   duration?: number
+  type: 'video' | 'audio'
 }
 
 interface DownloadItem {
@@ -38,6 +40,7 @@ interface DownloadItem {
   error?: string
   filePath?: string
   timestamp: Date
+  type: 'video' | 'audio'
 }
 
 const { t } = useI18n()
@@ -55,16 +58,22 @@ const error = ref('')
 const viewMode = ref<'detailed' | 'compact'>('detailed')
 const searchQuery = ref('')
 const sortBy = ref<'date' | 'name' | 'size'>('date')
+const filterType = ref<'all' | 'video' | 'audio'>('all')
 const videoToDelete = ref<VideoItem | null>(null)
 const isDeleting = ref(false)
 
 const filteredVideos = computed(() => {
   let result = [...localVideos.value]
 
-  // Filter
+  // Filter Search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(v => v.name.toLowerCase().includes(query))
+  }
+
+  // Filter Type
+  if (filterType.value !== 'all') {
+    result = result.filter(v => v.type === filterType.value)
   }
 
   // Sort
@@ -121,8 +130,24 @@ const loadLocalVideos = async () => {
   }
 }
 
+const isValidUrl = (string: string) => {
+  try {
+    const url = new URL(string);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch (_) {
+    return false;
+  }
+}
+
 const fetchMetadata = async () => {
   if (!url.value) return
+  
+  if (!isValidUrl(url.value)) {
+    error.value = t('downloader.error_invalid_url')
+    toast.error(t('downloader.error_invalid_url'))
+    return
+  }
+
   loadingMetadata.value = true
   error.value = ''
   metadata.value = null
@@ -131,8 +156,14 @@ const fetchMetadata = async () => {
     const data = await window.api.getMetadata(url.value)
     metadata.value = data
   } catch (e: any) {
-    error.value = e.message || t('downloader.error_metadata')
-    toast.error(t('downloader.error_metadata'))
+    const rawError = e.message || ''
+    // If error contains "is not a valid URL" or similar from yt-dlp, show a clean message
+    if (rawError.includes('is not a valid URL') || rawError.includes('ERROR:')) {
+      error.value = t('downloader.error_invalid_url')
+    } else {
+      error.value = t('downloader.error_metadata')
+    }
+    toast.error(error.value)
   } finally {
     loadingMetadata.value = false
   }
@@ -141,7 +172,7 @@ const fetchMetadata = async () => {
 const startDownload = async () => {
   if (!metadata.value) return
 
-  const exists = await window.api.checkVideoExists(metadata.value.title)
+  const exists = await window.api.checkVideoExists(metadata.value.title, selectedFormat.value)
   if (exists) {
     const confirmDownload = window.confirm(`"${metadata.value.title}" already exists in your library. Do you want to download it again?`)
     if (!confirmDownload) return
@@ -153,7 +184,8 @@ const startDownload = async () => {
     thumbnail: metadata.value.thumbnail,
     progress: 0,
     status: 'downloading',
-    timestamp: new Date()
+    timestamp: new Date(),
+    type: selectedFormat.value === 'bestaudio' ? 'audio' : 'video'
   }
 
   activeDownloads.value.unshift(newDownload)
@@ -421,7 +453,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                         class="h-7 px-2.5 text-[9px] font-black uppercase tracking-widest gap-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 border-none"
                         @click="openFile(download.filePath)"
                       >
-                        <PlayCircle class="h-3 w-3" /> {{ $t('downloader.view_video_short') }}
+                        <PlayCircle class="h-3 w-3" /> {{ download.type === 'audio' ? $t('downloader.play_audio_short') : $t('downloader.view_video_short') }}
                       </Button>
                       <div v-if="download.status === 'completed'" class="bg-green-500/10 text-green-500 text-[9px] font-black px-2 py-1 rounded-lg flex items-center uppercase tracking-widest">
                         <CheckCircle2 class="h-3 w-3 mr-1" />
@@ -469,7 +501,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
 
           <div class="flex items-center gap-2">
             <!-- Search Input -->
-            <div class="relative w-full md:w-56 group">
+            <div class="relative w-full md:w-48 group">
               <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
               <Input 
                 v-model="searchQuery" 
@@ -485,16 +517,31 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
               </button>
             </div>
 
-            <!-- Sort Dropdown -->
+            <!-- Filter Type Dropdown -->
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <Button variant="secondary" size="icon" class="h-9 w-9 shrink-0 bg-muted/30 border-none rounded-lg hover:bg-muted/50">
-                  <Filter class="h-3.5 w-3.5 opacity-60" />
+                  <div class="relative">
+                    <Filter class="h-3.5 w-3.5 opacity-60" />
+                    <div v-if="filterType !== 'all'" class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full border border-background"></div>
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" class="w-48 rounded-xl border-border/50 bg-card/95 backdrop-blur-xl">
-                <DropdownMenuLabel class="text-[10px] font-black uppercase tracking-widest opacity-50">{{ $t('downloader.sort_by') }}</DropdownMenuLabel>
+                <DropdownMenuLabel class="text-[10px] font-black uppercase tracking-widest opacity-50">{{ $t('downloader.filter_type') }}</DropdownMenuLabel>
                 <DropdownMenuSeparator class="bg-white/5" />
+                <DropdownMenuItem @click="filterType = 'all'" :class="{ 'bg-primary/10 text-primary': filterType === 'all' }" class="text-xs font-bold rounded-lg m-1">
+                  <LayoutGrid class="mr-2 h-3.5 w-3.5" /> {{ $t('downloader.type_all') }}
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="filterType = 'video'" :class="{ 'bg-primary/10 text-primary': filterType === 'video' }" class="text-xs font-bold rounded-lg m-1">
+                  <Film class="mr-2 h-3.5 w-3.5" /> {{ $t('downloader.type_video') }}
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="filterType = 'audio'" :class="{ 'bg-primary/10 text-primary': filterType === 'audio' }" class="text-xs font-bold rounded-lg m-1">
+                  <Music class="mr-2 h-3.5 w-3.5" /> {{ $t('downloader.type_audio') }}
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator class="bg-white/5" />
+                <DropdownMenuLabel class="text-[10px] font-black uppercase tracking-widest opacity-50">{{ $t('downloader.sort_by') }}</DropdownMenuLabel>
                 <DropdownMenuItem @click="setSortBy('date')" :class="{ 'bg-primary/10 text-primary': sortBy === 'date' }" class="text-xs font-bold rounded-lg m-1">
                   <Clock class="mr-2 h-3.5 w-3.5" /> {{ $t('downloader.sort_date') }}
                 </DropdownMenuItem>
@@ -536,10 +583,35 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
           <Card v-for="video in filteredVideos" :key="video.path" class="group overflow-hidden border-border/50 shadow-sm hover:shadow-xl transition-all duration-500 bg-card/40 backdrop-blur-md">
             <CardContent class="p-3">
               <div class="flex flex-col h-full">
-                <!-- Thumbnail Wrapper -->
-                <div class="relative aspect-video bg-muted/20 overflow-hidden cursor-pointer rounded-xl border border-border/50" @click="openFile(video.path)">
-                  <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  
+                <!-- Thumbnail Wrapper (Conditional for Video/Audio) -->
+                <div class="relative aspect-video overflow-hidden cursor-pointer rounded-xl border border-border/50 shadow-inner" @click="openFile(video.path)">
+                  <template v-if="video.type === 'video'">
+                    <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  </template>
+                  <template v-else>
+                    <!-- Audio Black Card Design -->
+                    <div class="w-full h-full bg-neutral-950 flex items-center justify-center relative overflow-hidden group/audio">
+                      <!-- Abstract Background Pattern -->
+                      <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)]"></div>
+                      <div class="absolute -inset-[100%] opacity-10 bg-[conic-gradient(from_0deg,transparent,rgba(249,115,22,0.1),transparent)] animate-[spin_15s_linear_infinite]"></div>
+                      
+                      <div class="relative z-10 flex flex-col items-center gap-3">
+                        <div class="p-4 rounded-3xl bg-orange-500/10 border border-orange-500/20 shadow-2xl backdrop-blur-xl group-hover/audio:scale-110 transition-transform duration-500">
+                          <Music class="h-10 w-10 text-orange-500 animate-pulse" />
+                        </div>
+                        <div class="flex flex-col items-center">
+                           <span class="text-[8px] font-black uppercase tracking-[0.3em] text-orange-500/40 mb-1">High Quality Audio</span>
+                           <div class="flex gap-0.5 items-end h-3">
+                             <div class="w-0.5 bg-orange-500/40 rounded-full animate-music-bar-1 h-[40%]"></div>
+                             <div class="w-0.5 bg-orange-500/60 rounded-full animate-music-bar-2 h-[70%]"></div>
+                             <div class="w-0.5 bg-orange-500/40 rounded-full animate-music-bar-3 h-[50%]"></div>
+                             <div class="w-0.5 bg-orange-500/60 rounded-full animate-music-bar-4 h-[90%]"></div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
                   <!-- Duration Badge -->
                   <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md text-[9px] font-black text-white tracking-widest border border-border/50 uppercase">
                     {{ formatDuration(video.duration) }}
@@ -551,6 +623,12 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                   <div class="space-y-1">
                     <p class="text-[13px] font-bold line-clamp-1 text-foreground tracking-tight" :title="video.name">{{ video.name }}</p>
                     <div class="flex items-center gap-2.5 text-[9px] text-muted-foreground/70 font-black uppercase tracking-widest">
+                      <span class="flex items-center gap-1" :class="{ 'text-orange-500': video.type === 'audio' }">
+                        <Music v-if="video.type === 'audio'" class="h-2.5 w-2.5" />
+                        <Film v-else class="h-2.5 w-2.5 opacity-50" />
+                        {{ video.type === 'audio' ? 'Audio' : 'Video' }}
+                      </span>
+                      <span class="opacity-20">•</span>
                       <span class="flex items-center gap-1"><HardDrive class="h-2.5 w-2.5 opacity-50" /> {{ formatFileSize(video.size) }}</span>
                       <span class="opacity-20">•</span>
                       <span class="flex items-center gap-1"><Clock class="h-2.5 w-2.5 opacity-50" /> {{ formatDate(video.mtime) }}</span>
@@ -571,7 +649,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                             <PlayCircle class="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p class="text-[10px] font-bold uppercase tracking-widest">{{ $t('downloader.view_video') }}</p></TooltipContent>
+                        <TooltipContent><p class="text-[10px] font-bold uppercase tracking-widest">{{ video.type === 'audio' ? $t('downloader.play_audio') : $t('downloader.view_video') }}</p></TooltipContent>
                       </Tooltip>
 
                       <Tooltip>
@@ -613,12 +691,17 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
         <div v-else class="space-y-1.5">
           <div v-for="video in filteredVideos" :key="video.path" class="group flex items-center justify-between p-2 pl-3 pr-2 bg-card/40 hover:bg-muted/30 rounded-xl border border-border/50 transition-all duration-300">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="bg-primary/10 p-1.5 rounded-lg text-primary shrink-0 transition-all">
-                <PlayCircle class="h-3.5 w-3.5" />
+              <div class="p-1.5 rounded-lg shrink-0 transition-all" :class="video.type === 'audio' ? 'bg-orange-500/10 text-orange-500' : 'bg-primary/10 text-primary'">
+                <Music v-if="video.type === 'audio'" class="h-3.5 w-3.5" />
+                <PlayCircle v-else class="h-3.5 w-3.5" />
               </div>
               <div class="min-w-0">
                 <p class="text-[11px] font-bold truncate text-foreground pr-4" :title="video.name">{{ video.name }}</p>
                 <div class="flex items-center gap-2.5 mt-0.5 opacity-50 text-[8px] font-black uppercase tracking-widest">
+                  <span class="flex items-center gap-1" :class="{ 'text-orange-500': video.type === 'audio' }">
+                    {{ video.type === 'audio' ? 'Audio' : 'Video' }}
+                  </span>
+                  <span class="opacity-30">•</span>
                   <span class="flex items-center gap-1"><HardDrive class="h-2 w-2" /> {{ formatFileSize(video.size) }}</span>
                   <span class="opacity-30">•</span>
                   <span class="flex items-center gap-1"><Clock class="h-2 w-2" /> {{ formatDate(video.mtime) }}</span>
@@ -648,7 +731,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
               </Tooltip>
               
               <Button variant="secondary" size="sm" class="h-7 px-3 font-black text-[9px] uppercase gap-1.5 shadow-sm rounded-lg bg-primary/10 text-primary hover:bg-primary/20 border-none ml-1" @click="openFile(video.path)">
-                <PlayCircle class="h-3 w-3" /> {{ $t('downloader.view_video_short') }}
+                <PlayCircle class="h-3 w-3" /> {{ video.type === 'audio' ? $t('downloader.play_audio_short') : $t('downloader.view_video_short') }}
               </Button>
             </div>
           </div>
@@ -704,4 +787,13 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
 .animate-shimmer {
   animation: shimmer 1.5s infinite linear;
 }
+
+@keyframes music-bar {
+  0%, 100% { height: 30%; }
+  50% { height: 100%; }
+}
+.animate-music-bar-1 { animation: music-bar 1.2s ease-in-out infinite; }
+.animate-music-bar-2 { animation: music-bar 0.8s ease-in-out infinite; }
+.animate-music-bar-3 { animation: music-bar 1.5s ease-in-out infinite; }
+.animate-music-bar-4 { animation: music-bar 1.0s ease-in-out infinite; }
 </style>
