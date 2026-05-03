@@ -19,6 +19,15 @@ const binaryManager = new BinaryManager()
 const downloader = new Downloader(binaryManager)
 const thumbnailManager = new ThumbnailManager(binaryManager)
 
+// Global Exception Handlers
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error)
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+})
+
 // Register thumb protocol
 app.whenReady().then(() => {
   protocol.handle('thumb', async (request) => {
@@ -123,7 +132,7 @@ function createWindow() {
       return true
     } catch (e) {
       console.error('Failed to delete video:', e)
-      return false
+      throw e
     }
   })
 
@@ -162,7 +171,7 @@ function createWindow() {
       return videos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
     } catch (e) {
       console.error('Failed to list videos:', e)
-      return []
+      throw e
     }
   })
 

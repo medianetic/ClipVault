@@ -54,7 +54,14 @@ const messages = {
       delete_forever: 'Delete Forever',
       library: 'Library',
       file: 'File | Files',
-      view_video: 'View Video'
+      view_video: 'View Video',
+      error_delete: 'Failed to delete video. The file might be in use.',
+      error_list: 'Failed to load library. Please check your download directory settings.',
+      error_metadata: 'Failed to fetch video details. Please check the URL.',
+      error_download: 'Download failed. See recent activity for details.',
+      error_binary_check: 'Failed to verify dependencies. Please restart the app.',
+      success_delete: 'Video deleted successfully.',
+      success_download: 'Download completed: {title}'
     },
     settings: {
       storage: 'Storage',
@@ -80,7 +87,9 @@ const messages = {
       version: 'Version {version} Stable',
       desc: 'A cross-platform UI for the yt-dlp CLI. Built with Vue 3, Electron, and Tailwind CSS.',
       developer: 'Developer',
-      visit_website: 'Visit Website'
+      visit_website: 'Visit Website',
+      success_dir: 'Download directory updated.',
+      error_dir: 'Failed to update download directory.'
     }
   },
   de: {
@@ -136,7 +145,14 @@ const messages = {
       delete_forever: 'Endgültig löschen',
       library: 'Bibliothek',
       file: 'Datei | Dateien',
-      view_video: 'Video ansehen'
+      view_video: 'Video ansehen',
+      error_delete: 'Video konnte nicht gelöscht werden. Die Datei wird eventuell verwendet.',
+      error_list: 'Bibliothek konnte nicht geladen werden. Bitte prüfen Sie die Download-Verzeichnis-Einstellungen.',
+      error_metadata: 'Details konnten nicht abgerufen werden. Bitte prüfen Sie die URL.',
+      error_download: 'Download fehlgeschlagen. Siehe letzte Aktivität für Details.',
+      error_binary_check: 'Abhängigkeiten konnten nicht überprüft werden. Bitte starten Sie die App neu.',
+      success_delete: 'Video erfolgreich gelöscht.',
+      success_download: 'Download abgeschlossen: {title}'
     },
     settings: {
       storage: 'Speicherort',
@@ -162,7 +178,9 @@ const messages = {
       version: 'Version {version} Stable',
       desc: 'Eine plattformübergreifende Benutzeroberfläche für yt-dlp. Erstellt mit Vue 3, Electron und Tailwind CSS.',
       developer: 'Entwickler',
-      visit_website: 'Webseite besuchen'
+      visit_website: 'Webseite besuchen',
+      success_dir: 'Download-Verzeichnis aktualisiert.',
+      error_dir: 'Download-Verzeichnis konnte nicht aktualisiert werden.'
     }
   }
 }

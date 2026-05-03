@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import DownloaderTab from '@/components/DownloaderTab.vue'
 import SettingsTab from '@/components/SettingsTab.vue'
+import { Toaster } from '@/components/ui/sonner'
 import { AlertCircle, Download, X } from 'lucide-vue-next'
 import { version } from '../package.json'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -100,6 +101,7 @@ onUnmounted(() => {
 
 <template>
   <TooltipProvider>
+    <Toaster />
     <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <div v-if="checkingBinaries" class="flex items-center justify-center flex-1">
         <p>{{ $t('app.checking_deps') }}</p>

@@ -18,6 +18,7 @@ import {
 import { 
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle 
 } from '@/components/ui/dialog'
+import { toast } from 'vue-sonner'
 
 interface VideoItem {
   name: string
@@ -39,7 +40,7 @@ interface DownloadItem {
   timestamp: Date
 }
 
-useI18n()
+const { t } = useI18n()
 
 const url = ref('')
 const loadingMetadata = ref(false)
@@ -112,8 +113,12 @@ const formatDate = (date: Date) => {
 }
 
 const loadLocalVideos = async () => {
-  const videos = await window.api.listVideos()
-  localVideos.value = videos
+  try {
+    const videos = await window.api.listVideos()
+    localVideos.value = videos
+  } catch (e) {
+    toast.error(t('downloader.error_list'))
+  }
 }
 
 const fetchMetadata = async () => {
@@ -126,7 +131,8 @@ const fetchMetadata = async () => {
     const data = await window.api.getMetadata(url.value)
     metadata.value = data
   } catch (e: any) {
-    error.value = e.message || 'Failed to fetch metadata. Please check the URL.'
+    error.value = e.message || t('downloader.error_metadata')
+    toast.error(t('downloader.error_metadata'))
   } finally {
     loadingMetadata.value = false
   }
@@ -152,10 +158,11 @@ const startDownload = async () => {
 
   activeDownloads.value.unshift(newDownload)
   const currentUrl = url.value
+  const currentTitle = metadata.value.title
   
   const downloadOptions = {
     url: currentUrl,
-    title: metadata.value.title,
+    title: currentTitle,
     format: selectedFormat.value,
     subtitles: enableSubtitles.value,
     subtitleLang: selectedSubLang.value
@@ -172,6 +179,7 @@ const startDownload = async () => {
       item.progress = 100
       item.filePath = result.filePath
     }
+    toast.success(t('downloader.success_download', { title: currentTitle }))
     await loadLocalVideos()
   } catch (e: any) {
     const item = activeDownloads.value.find(d => d.url === currentUrl)
@@ -179,6 +187,7 @@ const startDownload = async () => {
       item.status = 'error'
       item.error = e.message
     }
+    toast.error(t('downloader.error_download'))
   }
 }
 
@@ -201,12 +210,18 @@ const confirmDelete = (video: VideoItem) => {
 const deleteVideo = async () => {
   if (!videoToDelete.value) return
   isDeleting.value = true
-  const success = await window.api.deleteVideo(videoToDelete.value.path)
-  if (success) {
-    await loadLocalVideos()
-    videoToDelete.value = null
+  try {
+    const success = await window.api.deleteVideo(videoToDelete.value.path)
+    if (success) {
+      toast.success(t('downloader.success_delete'))
+      await loadLocalVideos()
+      videoToDelete.value = null
+    }
+  } catch (e) {
+    toast.error(t('downloader.error_delete'))
+  } finally {
+    isDeleting.value = false
   }
-  isDeleting.value = false
 }
 
 onMounted(async () => {

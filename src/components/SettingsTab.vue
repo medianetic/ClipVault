@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FolderOpen, Moon, Sun, Monitor, HardDrive, Palette, Info, ExternalLink, User, Settings2, Globe, RefreshCcw, AlertTriangle } from 'lucide-vue-next'
 import { version } from '../../package.json'
+import { toast } from 'vue-sonner'
 
 const { locale, t } = useI18n()
 
@@ -30,10 +31,15 @@ const loadSettings = async () => {
 }
 
 const selectDirectory = async () => {
-  const path = await window.api.selectDirectory()
-  if (path) {
-    downloadDir.value = path
-    await window.api.setStoreValue('downloadDir', path)
+  try {
+    const path = await window.api.selectDirectory()
+    if (path) {
+      downloadDir.value = path
+      await window.api.setStoreValue('downloadDir', path)
+      toast.success(t('settings.success_dir'))
+    }
+  } catch (e) {
+    toast.error(t('settings.error_dir'))
   }
 }
 
