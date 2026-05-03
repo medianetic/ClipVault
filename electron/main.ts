@@ -125,27 +125,31 @@ function createWindow() {
       const files = await fs.readdir(folder)
       const videoExtensions = ['.mp4', '.mkv', '.webm', '.avi', '.mov', '.m4a', '.mp3']
       
-      const videos = []
-      for (const file of files) {
+      const videoPromises = files.map(async (file) => {
         const ext = path.extname(file).toLowerCase()
         if (videoExtensions.includes(ext)) {
           const fullPath = path.join(folder, file)
           const stats = await fs.stat(fullPath)
           
-          // Try to get thumbnail and metadata
-          const thumb = await thumbnailManager.getThumbnail(fullPath)
-          const metadata = await thumbnailManager.getVideoMetadata(fullPath)
+          const [thumb, metadata] = await Promise.all([
+            thumbnailManager.getThumbnail(fullPath),
+            thumbnailManager.getVideoMetadata(fullPath)
+          ])
 
-          videos.push({
+          return {
             name: file,
             path: fullPath,
             size: stats.size,
             mtime: stats.mtime,
             thumbnail: thumb ? `thumb://${thumb}` : null,
             duration: metadata?.duration || 0
-          })
+          }
         }
-      }
+        return null
+      })
+
+      const videos = (await Promise.all(videoPromises)).filter((v): v is any => v !== null)
+      
       // Sort by modified time descending
       return videos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
     } catch (e) {

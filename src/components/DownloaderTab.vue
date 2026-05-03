@@ -292,8 +292,8 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
       <div v-if="metadata" class="animate-in zoom-in-95 duration-300">
         <Card class="overflow-hidden border border-primary/15 shadow-2xl bg-card/40 backdrop-blur-xl">
           <div class="flex flex-col md:flex-row">
-            <div class="md:w-1/4 relative group shrink-0">
-              <img :src="metadata.thumbnail" class="w-full h-full object-cover aspect-video md:aspect-auto" v-if="metadata.thumbnail" />
+            <div class="md:w-1/4 relative group shrink-0 bg-muted">
+              <img :src="metadata.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover aspect-video md:aspect-auto" />
               <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                 <div class="bg-black/60 backdrop-blur-md text-white px-2 py-0.5 rounded text-[10px] font-bold border border-border/50">
                   {{ metadata.duration_string }}
@@ -370,7 +370,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
             <CardContent class="p-2.5">
               <div class="flex items-center gap-3">
                 <div class="relative w-20 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-muted border border-border/50">
-                  <img :src="download.thumbnail" class="w-full h-full object-cover" v-if="download.thumbnail" />
+                  <img :src="download.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover" />
                   <div v-if="download.status === 'downloading'" class="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <Loader2 class="h-4 w-4 text-white animate-spin" />
                   </div>
@@ -523,10 +523,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
               <div class="flex flex-col h-full">
                 <!-- Thumbnail Wrapper -->
                 <div class="relative aspect-video bg-muted/20 overflow-hidden cursor-pointer rounded-xl border border-border/50" @click="openFile(video.path)">
-                  <img v-if="video.thumbnail" :src="video.thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                  <div v-else class="w-full h-full flex items-center justify-center">
-                    <PlayCircle class="h-10 w-10 text-muted-foreground/10" />
-                  </div>
+                  <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                   
                   <!-- Duration Badge -->
                   <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-md text-[9px] font-black text-white tracking-widest border border-border/50 uppercase">

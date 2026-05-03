@@ -4,21 +4,28 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 
 ## 📸 Screenshots
 
-<p align="center">
-  <img src="/screenshots/Screenshot-Start-Download.png" width="800" alt="ClipVault Main Interface">
-  <em>Main Window, Starting Download</em>
-</p>
-
-<p align="center">
-  <img src="/screenshots/Screenshot-Settings.png" width="800" alt="Library Compact View">
-  <em>Settings View</em>
-</p>
-
-<p align="center">
-  <img src="/screenshots/Screenshot-Library-View-Compact.png" width="800" alt="Library Compact View">
-  <img src="/screenshots/Screenshot-Library-View-Detail.png" width="800" alt="Library Compact View">
-  <em>Visual Library with Thumbnails and Compact Shortlist View</em>
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="screenshots/01-Screenshot-Start-Download.png" width="400" alt="ClipVault Main Interface"><br>
+      <em>Main Window, Starting Download</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/04-Screenshot-Settings.png" width="400" alt="Settings View"><br>
+      <em>Settings View</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="screenshots/02-Screenshot-Library-View-Detail.png" width="400" alt="Library Detail View"><br>
+      <em>Visual Library with Thumbnails</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/03-Screenshot-Library-View-Compact.png" width="400" alt="Library Compact View"><br>
+      <em>Compact Shortlist View</em>
+    </td>
+  </tr>
+</table>
 
 ## Key Features
 
