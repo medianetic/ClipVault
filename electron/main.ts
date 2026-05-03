@@ -65,6 +65,9 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1000,
     height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    frame: false,
     icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -76,6 +79,16 @@ function createWindow() {
   win.setMenu(null)
 
   // IPC Handlers
+  ipcMain.handle('window-minimize', () => win?.minimize())
+  ipcMain.handle('window-maximize', () => {
+    if (win?.isMaximized()) {
+      win.unmaximize()
+    } else {
+      win?.maximize()
+    }
+  })
+  ipcMain.handle('window-close', () => win?.close())
+
   ipcMain.handle('check-binaries', () => binaryManager.checkBinaries())
   
   ipcMain.handle('download-yt-dlp', async (_event) => {

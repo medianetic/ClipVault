@@ -11,6 +11,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { AlertCircle, Download, X } from 'lucide-vue-next'
 import { version } from '../package.json'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import Titlebar from '@/components/Titlebar.vue'
 
 const binariesReady = ref(false)
 const checkingBinaries = ref(true)
@@ -103,6 +104,7 @@ onUnmounted(() => {
   <TooltipProvider>
     <Toaster />
     <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
+      <Titlebar />
       <div v-if="checkingBinaries" class="flex items-center justify-center flex-1">
         <p>{{ $t('app.checking_deps') }}</p>
       </div>

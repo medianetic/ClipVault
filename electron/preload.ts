@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('api', {
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   getStoreValue: (key: string) => ipcRenderer.invoke('get-store-value', key),
   setStoreValue: (key: string, value: any) => ipcRenderer.invoke('set-store-value', key, value),
-  checkVideoExists: (title: string) => ipcRenderer.invoke('check-video-exists', title),
+  checkVideoExists: (title: string, format?: string) => ipcRenderer.invoke('check-video-exists', title, format),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
   openFolder: (filePath: string) => ipcRenderer.invoke('open-folder', filePath),
@@ -27,4 +27,7 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('download-progress', listener)
     return () => ipcRenderer.removeListener('download-progress', listener)
   },
+  minimize: () => ipcRenderer.invoke('window-minimize'),
+  maximize: () => ipcRenderer.invoke('window-maximize'),
+  close: () => ipcRenderer.invoke('window-close'),
 })
