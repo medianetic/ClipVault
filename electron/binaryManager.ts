@@ -77,7 +77,9 @@ export class BinaryManager {
     }
 
     const zipPath = path.join(this.binPath, 'ffmpeg.zip')
-    await this.downloadFile(url, zipPath, onProgress)
+    await this.downloadFile(url, zipPath, (progress) => {
+      if (onProgress) onProgress(Math.round(progress / 2))
+    })
     
     const zip = new AdmZip(zipPath)
     zip.extractAllTo(this.binPath, true)
@@ -88,7 +90,9 @@ export class BinaryManager {
     // Download ffprobe as well
     let ffprobeUrl = url.replace('ffmpeg', 'ffprobe')
     const probeZipPath = path.join(this.binPath, 'ffprobe.zip')
-    await this.downloadFile(ffprobeUrl, probeZipPath, onProgress)
+    await this.downloadFile(ffprobeUrl, probeZipPath, (progress) => {
+      if (onProgress) onProgress(Math.round(50 + progress / 2))
+    })
     const probeZip = new AdmZip(probeZipPath)
     probeZip.extractAllTo(this.binPath, true)
     fs.unlinkSync(probeZipPath)
@@ -96,6 +100,13 @@ export class BinaryManager {
     if (platform !== 'win32') {
       chmodSync(this.getFFmpegPath(), 0o755)
       chmodSync(this.getFFprobePath(), 0o755)
+    }
+  }
+
+  async deleteBinaries(): Promise<void> {
+    if (fs.existsSync(this.binPath)) {
+      fs.rmSync(this.binPath, { recursive: true, force: true })
+      fs.mkdirSync(this.binPath, { recursive: true })
     }
   }
 

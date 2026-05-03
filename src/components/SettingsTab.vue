@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FolderOpen, Moon, Sun, Monitor, HardDrive, Palette, Info, ExternalLink, User, Settings2, Globe } from 'lucide-vue-next'
+import { FolderOpen, Moon, Sun, Monitor, HardDrive, Palette, Info, ExternalLink, User, Settings2, Globe, RefreshCcw, AlertTriangle } from 'lucide-vue-next'
 import { version } from '../../package.json'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const downloadDir = ref('')
 const theme = ref('system')
@@ -16,6 +16,7 @@ const appLang = ref('en')
 const defaultQuality = ref('best')
 const defaultSubtitles = ref(false)
 const defaultSubLang = ref('en')
+const isResetting = ref(false)
 
 const loadSettings = async () => {
   downloadDir.value = await window.api.getStoreValue('downloadDir') || ''
@@ -72,6 +73,15 @@ watch(defaultSubLang, async (val) => {
 
 const openExternal = (url: string) => {
   window.api.openExternal(url)
+}
+
+const resetBinaries = async () => {
+  if (window.confirm(t('settings.reset_confirm'))) {
+    isResetting.value = true
+    await window.api.deleteBinaries()
+    // Reload to trigger download check in App.vue
+    window.location.reload()
+  }
 }
 
 onMounted(loadSettings)
@@ -200,6 +210,36 @@ onMounted(loadSettings)
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Troubleshooting Section -->
+    <section class="space-y-3">
+      <div class="flex items-center gap-2 mb-1">
+        <div class="bg-destructive/10 p-1.5 rounded-lg text-destructive">
+          <AlertTriangle class="h-4 w-4" />
+        </div>
+        <h3 class="text-base font-bold">{{ $t('settings.troubleshooting') }}</h3>
+      </div>
+      <div class="pl-10 space-y-3">
+        <div class="p-4 bg-destructive/5 rounded-2xl border border-destructive/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center sm:text-left">
+            <p class="text-xs font-bold text-foreground">{{ $t('settings.reset_deps') }}</p>
+            <p class="text-[10px] text-muted-foreground leading-relaxed max-w-sm">
+              {{ $t('settings.reset_deps_desc') }}
+            </p>
+          </div>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            class="h-9 px-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-destructive/10 shrink-0"
+            @click="resetBinaries"
+            :disabled="isResetting"
+          >
+            <RefreshCcw class="mr-2 h-3.5 w-3.5" :class="{ 'animate-spin': isResetting }" />
+            {{ $t('settings.reset_deps') }}
+          </Button>
         </div>
       </div>
     </section>

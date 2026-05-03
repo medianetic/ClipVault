@@ -63,6 +63,9 @@ function createWindow() {
     },
   })
 
+  // Hide the menu bar on Windows and Linux
+  win.setMenu(null)
+
   // IPC Handlers
   ipcMain.handle('check-binaries', () => binaryManager.checkBinaries())
   
@@ -77,6 +80,11 @@ function createWindow() {
     await binaryManager.downloadFFmpeg((progress) => {
       win?.webContents.send('binary-progress', { name: 'ffmpeg', progress })
     })
+    return true
+  })
+
+  ipcMain.handle('delete-binaries', async () => {
+    await binaryManager.deleteBinaries()
     return true
   })
 
@@ -185,6 +193,5 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(() => {
-  Menu.setApplicationMenu(null)
   createWindow()
 })

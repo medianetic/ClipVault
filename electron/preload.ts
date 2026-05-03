@@ -15,7 +15,16 @@ contextBridge.exposeInMainWorld('api', {
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
   openFolder: (filePath: string) => ipcRenderer.invoke('open-folder', filePath),
   deleteVideo: (filePath: string) => ipcRenderer.invoke('delete-video', filePath),
+  deleteBinaries: () => ipcRenderer.invoke('delete-binaries'),
   listVideos: (dirPath?: string) => ipcRenderer.invoke('list-videos', dirPath),
-  onBinaryProgress: (callback: any) => ipcRenderer.on('binary-progress', (_event, value) => callback(value)),
-  onDownloadProgress: (callback: any) => ipcRenderer.on('download-progress', (_event, value) => callback(value)),
+  onBinaryProgress: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('binary-progress', listener)
+    return () => ipcRenderer.removeListener('binary-progress', listener)
+  },
+  onDownloadProgress: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('download-progress', listener)
+    return () => ipcRenderer.removeListener('download-progress', listener)
+  },
 })

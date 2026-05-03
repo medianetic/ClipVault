@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,10 +14,14 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 const binariesReady = ref(false)
 const checkingBinaries = ref(true)
 const binaryStatus = ref({ ytDlp: false, ffmpeg: false, ffprobe: false })
-const downloadingBinary = ref<string | null>(null)
-const downloadProgress = ref(0)
+const isDownloading = ref(false)
+const downloadProgress = ref({
+  ytDlp: { active: false, progress: 0 },
+  ffmpeg: { active: false, progress: 0 }
+})
 
 const activeTab = ref('downloader')
+let cleanupBinary: (() => void) | null = null
 
 const { locale } = useI18n()
 
@@ -35,21 +39,40 @@ const applyTheme = (tTheme: string) => {
 
 const checkBinaries = async () => {
   checkingBinaries.value = true
-  binaryStatus.value = await window.api.checkBinaries()
-  binariesReady.value = binaryStatus.value.ytDlp && binaryStatus.value.ffmpeg && binaryStatus.value.ffprobe
-  checkingBinaries.value = false
+  try {
+    // Add a small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500))
+    binaryStatus.value = await window.api.checkBinaries()
+    binariesReady.value = binaryStatus.value.ytDlp && binaryStatus.value.ffmpeg && binaryStatus.value.ffprobe
+  } catch (e) {
+    console.error('Failed to check binaries:', e)
+    binariesReady.value = false
+  } finally {
+    checkingBinaries.value = false
+  }
 }
 
 const installBinaries = async () => {
+  isDownloading.value = true
+  
+  const tasks = []
+  
   if (!binaryStatus.value.ytDlp) {
-    downloadingBinary.value = 'yt-dlp'
-    await window.api.downloadYTIDlp()
+    downloadProgress.value.ytDlp.active = true
+    tasks.push(window.api.downloadYTIDlp().then(() => {
+      downloadProgress.value.ytDlp.progress = 100
+    }))
   }
+  
   if (!binaryStatus.value.ffmpeg || !binaryStatus.value.ffprobe) {
-    downloadingBinary.value = 'ffmpeg & ffprobe'
-    await window.api.downloadFFmpeg()
+    downloadProgress.value.ffmpeg.active = true
+    tasks.push(window.api.downloadFFmpeg().then(() => {
+      downloadProgress.value.ffmpeg.progress = 100
+    }))
   }
-  downloadingBinary.value = null
+  
+  await Promise.all(tasks)
+  isDownloading.value = false
   await checkBinaries()
 }
 
@@ -61,9 +84,17 @@ onMounted(async () => {
   applyTheme(theme)
 
   checkBinaries()
-  window.api.onBinaryProgress(({ progress }) => {
-    downloadProgress.value = progress
+  cleanupBinary = window.api.onBinaryProgress(({ name, progress }) => {
+    if (name === 'yt-dlp') {
+      downloadProgress.value.ytDlp.progress = progress
+    } else {
+      downloadProgress.value.ffmpeg.progress = progress
+    }
   })
+})
+
+onUnmounted(() => {
+  if (cleanupBinary) cleanupBinary()
 })
 </script>
 
@@ -74,23 +105,42 @@ onMounted(async () => {
         <p>{{ $t('app.checking_deps') }}</p>
       </div>
 
-      <div v-else-if="!binariesReady" class="flex items-center justify-center flex-1">
-        <Card class="w-[450px]">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2">
-              <AlertCircle class="text-destructive" />
+      <div v-else-if="!binariesReady" class="flex items-center justify-center flex-1 p-6">
+        <Card class="w-[500px] border-border/50 shadow-2xl bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden">
+          <CardHeader class="pb-4">
+            <CardTitle class="flex items-center gap-3 text-xl font-black uppercase tracking-tight">
+              <div class="bg-destructive/10 p-2 rounded-xl">
+                <AlertCircle class="text-destructive h-6 w-6" />
+              </div>
               {{ $t('app.missing_deps') }}
             </CardTitle>
-            <CardDescription>
+            <CardDescription class="text-xs font-bold pt-1">
               {{ $t('app.deps_required') }}
             </CardDescription>
           </CardHeader>
-          <CardContent class="space-y-4">
-            <div v-if="downloadingBinary" class="space-y-2">
-              <p class="text-sm">{{ $t('app.downloading', { binary: downloadingBinary }) }}</p>
-              <Progress :model-value="downloadProgress" />
+          <CardContent class="space-y-6">
+            <div class="p-4 bg-muted/40 rounded-2xl border border-border/50">
+              <p class="text-[11px] leading-relaxed text-muted-foreground/90 font-medium whitespace-pre-wrap" v-html="$t('app.deps_explanation').replace(/\*\*(.*?)\*\*/g, '<span class=\'text-foreground font-black\'>$1</span>')"></p>
             </div>
-            <Button v-else @click="installBinaries" class="w-full">
+
+            <div v-if="isDownloading" class="space-y-4 animate-in fade-in duration-500">
+              <div v-if="downloadProgress.ytDlp.active" class="space-y-2">
+                <div class="flex justify-between items-end">
+                  <p class="text-[9px] font-black uppercase tracking-widest text-primary">yt-dlp</p>
+                  <span class="text-[9px] font-black tabular-nums">{{ Math.round(downloadProgress.ytDlp.progress) }}%</span>
+                </div>
+                <Progress :model-value="downloadProgress.ytDlp.progress" class="h-1.5 rounded-full overflow-hidden bg-muted shadow-inner" />
+              </div>
+
+              <div v-if="downloadProgress.ffmpeg.active" class="space-y-2">
+                <div class="flex justify-between items-end">
+                  <p class="text-[9px] font-black uppercase tracking-widest text-primary">FFmpeg & FFprobe</p>
+                  <span class="text-[9px] font-black tabular-nums">{{ Math.round(downloadProgress.ffmpeg.progress) }}%</span>
+                </div>
+                <Progress :model-value="downloadProgress.ffmpeg.progress" class="h-1.5 rounded-full overflow-hidden bg-muted shadow-inner" />
+              </div>
+            </div>
+            <Button v-else @click="installBinaries" class="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
               <Download class="mr-2 h-4 w-4" />
               {{ $t('app.download_install') }}
             </Button>
