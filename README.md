@@ -31,7 +31,13 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 
 - **Broad Compatibility**: Leverage the power of `yt-dlp` to download from a vast range of websites beyond just YouTube.
 - **Modern User Experience**: A clean, responsive interface built with Vue 3, Tailwind CSS, and shadcn-vue components.
-- **Smart Quality Selection**: Choose between highest available quality, specific formats (MP4, MKV), or audio-only extraction.
+- **High-Quality Video Downloads**: Download videos in various resolutions up to 4K/8K. Supports popular formats like MP4, MKV, and WebM.
+- **Audio-Only Downloads**: Extract high-quality MP3 audio from any video. Audio files are automatically named with an `-audio-only` suffix to prevent conflicts with video versions.
+- **Smart Quality Selection**: Choose between highest available quality or specific remuxed streams.
+- **Library Filtering & Visualization**:
+  - **Dynamic Filters**: Easily filter your library to show All Files, Video only, or Audio only.
+  - **Sleek Audio Cards**: Audio files feature a dedicated "black card" design with animated visualizers and music icons.
+  - **Context-Aware Controls**: Labels dynamically switch between "Play" (for audio) and "View" (for video).
 - **Automated Dependency Management**: ClipVault automatically handles the setup and updates for `yt-dlp` and `FFmpeg` on first run.
 - **Subtitle Support**: Select and embed subtitles in multiple languages directly into your downloads.
 - **Integrated Library**: Track and manage your download history and local library directly within the application.
