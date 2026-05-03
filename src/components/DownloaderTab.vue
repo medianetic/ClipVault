@@ -62,13 +62,24 @@ const filterType = ref<'all' | 'video' | 'audio'>('all')
 const videoToDelete = ref<VideoItem | null>(null)
 const isDeleting = ref(false)
 
+const fuzzySearch = (text: string, query: string) => {
+  const t = text.toLowerCase()
+  const q = query.toLowerCase()
+  let i = 0
+  let j = 0
+  while (i < t.length && j < q.length) {
+    if (t[i] === q[j]) j++
+    i++
+  }
+  return j === q.length
+}
+
 const filteredVideos = computed(() => {
   let result = [...localVideos.value]
 
   // Filter Search
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(v => v.name.toLowerCase().includes(query))
+    result = result.filter(v => fuzzySearch(v.name, searchQuery.value))
   }
 
   // Filter Type
