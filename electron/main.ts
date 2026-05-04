@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, Menu, protocol } from 'electron'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { app, BrowserWindow, ipcMain, dialog, shell, protocol } from 'electron'
+import { fileURLToPath } from 'node:url'
 
 // Register custom protocols as privileged
 protocol.registerSchemesAsPrivileged([

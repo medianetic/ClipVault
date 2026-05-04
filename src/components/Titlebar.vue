@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Minus, Square, X, Maximize2 } from 'lucide-vue-next'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 
 const isMaximized = ref(false)
 
