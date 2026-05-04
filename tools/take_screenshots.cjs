@@ -2,6 +2,12 @@ const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
+// Add flags for better compatibility in headless environments
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-dev-shm-usage');
+
 async function capture(url, name, actions = null) {
   console.log(`Capturing ${name}...`);
   const win = new BrowserWindow({
@@ -46,7 +52,8 @@ app.whenReady().then(async () => {
   const url = 'http://localhost:5173/';
   
   try {
-    await capture(url, 'main-ui.png', `
+    // 1. Main UI with metadata fetched
+    await capture(url, '01-Screenshot-Start-Download.png', `
       const input = document.querySelector('input[placeholder*="youtube.com"]');
       if (input) {
         input.value = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ';
@@ -57,11 +64,19 @@ app.whenReady().then(async () => {
       }
     `);
 
-    await capture(url, 'library-grid.png');
+    // 2. Library Grid View
+    await capture(url, '02-Screenshot-Library-View-Detail.png');
 
-    await capture(url, 'library-compact.png', `
+    // 3. Library Compact View
+    await capture(url, '03-Screenshot-Library-View-Compact.png', `
       const listBtn = document.querySelector('.lucide-list')?.closest('button');
       if (listBtn) listBtn.click();
+    `);
+
+    // 4. Settings View
+    await capture(url, '04-Screenshot-Settings.png', `
+      const settingsTab = document.querySelector('button[value="settings"]');
+      if (settingsTab) settingsTab.click();
     `);
 
     console.log('All screenshots captured!');

@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "screenshots": "node tools/update_screenshots.js",
+    "auto-screenshots": "node tools/auto_update_screenshots.js"
   },
   "dependencies": {
     "@vueuse/core": "^14.3.0",
