@@ -15,7 +15,7 @@ async function captureIcon() {
     }
   });
 
-  const svgPath = path.join(__dirname, 'public/icon.svg');
+  const svgPath = path.join(__dirname, '../public/icon.svg');
   const svgContent = fs.readFileSync(svgPath, 'utf8');
   
   const html = `
@@ -41,8 +41,8 @@ async function captureIcon() {
   const image = await win.webContents.capturePage();
   const pngBuffer = image.toPNG();
   
-  fs.writeFileSync(path.join(__dirname, 'public/icon.png'), pngBuffer);
-  fs.writeFileSync(path.join(__dirname, 'build/icon.png'), pngBuffer);
+  fs.writeFileSync(path.join(__dirname, '../public/icon.png'), pngBuffer);
+  fs.writeFileSync(path.join(__dirname, '../build/icon.png'), pngBuffer);
   
   console.log('Icon PNGs generated!');
   win.close();

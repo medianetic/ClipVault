@@ -59,7 +59,7 @@ async function capture(url, name, actions = null) {
   }
 
   const image = await win.webContents.capturePage();
-  const folder = path.join(__dirname, 'screenshots');
+  const folder = path.join(__dirname, '../screenshots');
   if (!fs.existsSync(folder)) fs.mkdirSync(folder);
   fs.writeFileSync(path.join(folder, name), image.toPNG());
   win.close();

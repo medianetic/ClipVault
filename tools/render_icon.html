@@ -9,7 +9,7 @@
 <body>
   <div id="icon-container"></div>
   <script>
-    fetch('public/icon.svg')
+    fetch('../public/icon.svg')
       .then(r => r.text())
       .then(svg => {
         document.getElementById('icon-container').innerHTML = svg;
