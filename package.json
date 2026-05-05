@@ -5,6 +5,7 @@
   "description": "ClipVault - A high-performance Electron frontend for yt-dlp",
   "author": "Nick Weschkalnies",
   "type": "module",
+  "repository": "https://github.com/medianetic/ClipVault/",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
