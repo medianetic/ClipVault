@@ -1,0 +1,45 @@
+name: Build and Release Electron App
+
+on:
+  push:
+    tags:
+      - 'v*' # Der Workflow startet nur, wenn du einen Tag pushst, der mit "v" beginnt (z.B. v1.0.0)
+
+permissions:
+  contents: write # Erlaubt dem GitHub-Token, Releases zu erstellen und Dateien hochzuladen
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      # Verhindert, dass alle anderen Builds abbrechen, wenn einer fehlschlägt
+      fail-fast: false 
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Passe dies an die Node-Version deines Projekts an
+          cache: 'npm'       # Beschleunigt zukünftige Builds durch Caching
+
+      - name: Install Dependencies
+        run: npm ci # 'npm ci' ist in CI-Umgebungen sicherer und schneller als 'npm install'
+
+      # Linux benötigt oft zusätzliche Bibliotheken, um Electron-Apps zu bauen
+      - name: Install Linux dependencies (nur Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools libopenjp2-7
+
+      - name: Build and Publish
+        run: npm run build
+        env:
+          # Der GITHUB_TOKEN ist automatisch vorhanden und erlaubt den Upload ins Release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
