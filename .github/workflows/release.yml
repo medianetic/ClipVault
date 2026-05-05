@@ -29,14 +29,7 @@ jobs:
           cache: 'npm'       # Beschleunigt zukünftige Builds durch Caching
 
       - name: Install Dependencies
-        run: npm ci # 'npm ci' ist in CI-Umgebungen sicherer und schneller als 'npm install'
-
-      - name: Install Linux dependencies (nur Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update -y
-          sudo apt-get upgrade -y
-          sudo apt-get install -y libarchive-tools libopenjp2-7 snapcraft
+        run: npm ci # 'npm ci' ist in CI-Umgebungen sicherer und schneller als 'npm install'     
 
       # ---> NEU: Vue/Vite Code kompilieren (erstellt den dist-electron Ordner!) <---
       - name: Compile Vue/Vite Code
