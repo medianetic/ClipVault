@@ -2,8 +2,8 @@ name: Build and Release Electron App
 
 on:
   push:
-    tags:
-      - 'v*' # Der Workflow startet nur, wenn du einen Tag pushst, der mit "v" beginnt (z.B. v1.0.0)
+    branches:
+      - main # Der Workflow startet bei jedem Push in den main Branch
 
 permissions:
   contents: write # Erlaubt dem GitHub-Token, Releases zu erstellen und Dateien hochzuladen
@@ -30,6 +30,13 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci # 'npm ci' ist in CI-Umgebungen sicherer und schneller als 'npm install'     
+
+      - name: Install Linux Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools fakeroot
+          sudo snap install snapcraft --classic
 
       # ---> NEU: Vue/Vite Code kompilieren (erstellt den dist-electron Ordner!) <---
       - name: Compile Vue/Vite Code
