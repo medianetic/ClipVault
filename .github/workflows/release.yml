@@ -38,8 +38,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libarchive-tools libopenjp2-7
 
-      - name: Build and Publish
-        run: npx electron-builder --publish always
+      # ---> NEU: Vue/Vite Code kompilieren (erstellt den dist-electron Ordner!) <---
+      - name: Compile Vue/Vite Code
+        run: npm run build
+
+      # ---> GEÄNDERT: electron-builder über das neue npm-Skript aufrufen <---
+      - name: Build and Publish Electron App
+        run: npm run electron:build -- --publish always
         env:
-          # Der GITHUB_TOKEN ist automatisch vorhanden und erlaubt den Upload ins Release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Wichtiges Fallback für electron-builder

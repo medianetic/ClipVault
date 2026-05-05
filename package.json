@@ -6,15 +6,24 @@
   "author": "Nick Weschkalnies",
   "type": "module",
   "repository": "https://github.com/medianetic/ClipVault/",
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && electron-builder",
+    "build": "vue-tsc && vite build",
+    "electron:build": "electron-builder",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "screenshots": "node tools/update_screenshots.js",
     "auto-screenshots": "node tools/auto_update_screenshots.js"
+  },
+  "build": {
+    "files": [
+      "dist-electron/**/*",
+      "dist/**/*",
+      "package.json"
+    ]
   },
   "dependencies": {
     "@vueuse/core": "^14.3.0",
@@ -52,6 +61,5 @@
     "vite-plugin-electron-renderer": "^0.14.7",
     "vitest": "^4.1.5",
     "vue-tsc": "^2.0.26"
-  },
-  "main": "dist-electron/main.js"
+  }
 }
