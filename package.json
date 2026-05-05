@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "electron:build": "electron-builder",
+    "electron:build": "electron-builder --config electron-builder.json5",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:ui": "vitest --ui",

@@ -4,6 +4,13 @@
   "appId": "com.clipvault.app",
   "asar": true,
   "productName": "ClipVault",
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "medianetic",
+      "repo": "ClipVault"
+    }
+  ],
   "directories": {
     "output": "release/${version}"
   },
@@ -37,6 +44,9 @@
   "linux": {
     "target": [
       "AppImage"
+    ],
+    "publish": [
+      "github"
     ],
     "category": "Utility",
     "executableName": "clipvault",
