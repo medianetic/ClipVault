@@ -47,7 +47,20 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 
 ### Binary Downloads
 
-*Coming soon: Pre-built binaries for Windows, macOS, and Linux will be available in the Releases section.*
+You can download the latest pre-built binaries for your platform from the [v1.4.2 Release Page](https://github.com/medianetic/ClipVault/releases/tag/v1.4.2).
+
+#### Windows
+- [**ClipVault-Setup-1.4.2.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-Setup-1.4.2.exe) (Installer)
+- [**ClipVault-1.4.2.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.exe) (Portable)
+
+#### macOS
+- [**ClipVault-1.4.2.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.dmg) (Intel & Apple Silicon)
+- [**ClipVault-1.4.2-mac.zip**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2-mac.zip)
+
+#### Linux
+- [**ClipVault-1.4.2.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.AppImage)
+- [**clipvault_1.4.2_amd64.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/clipvault_1.4.2_amd64.deb) (Debian/Ubuntu)
+- [**clipvault-1.4.2.x86_64.rpm**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/clipvault-1.4.2.x86_64.rpm) (Fedora/RedHat)
 
 ### Building from Source
 
@@ -55,8 +68,8 @@ To build ClipVault manually, ensure you have [Node.js](https://nodejs.org/) (LTS
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/clipvault.git
-   cd clipvault
+   git clone https://github.com/medianetic/ClipVault.git
+   cd ClipVault
    ```
 
 2. **Install dependencies**
