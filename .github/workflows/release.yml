@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Passe dies an die Node-Version deines Projekts an
+          node-version: '22' # Passe dies an die Node-Version deines Projekts an
           cache: 'npm'       # Beschleunigt zukünftige Builds durch Caching
 
       - name: Install Dependencies
@@ -36,7 +36,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libarchive-tools libopenjp2-7
+          sudo apt-get install -y libarchive-tools libopenjp2-7 snapcraft
 
       # ---> NEU: Vue/Vite Code kompilieren (erstellt den dist-electron Ordner!) <---
       - name: Compile Vue/Vite Code
