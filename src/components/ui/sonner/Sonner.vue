@@ -13,23 +13,40 @@ import { Toaster as Sonner } from 'vue-sonner'
 import 'vue-sonner/style.css'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<ToasterProps>()
+const props = withDefaults(defineProps<ToasterProps & { theme?: 'light' | 'dark' | 'system' }>(), {
+  theme: 'auto',
+  position: 'bottom-right',
+  expand: true,
+})
 </script>
 
 <template>
   <Sonner
     :class="cn('toaster group', props.class)"
     v-bind="props"
-    rich-colors
+    :theme="props.theme"
+    :expand="props.expand"
+    :rich-colors="false"
     :style="{
       '--normal-bg': 'var(--popover)',
       '--normal-text': 'var(--popover-foreground)',
       '--normal-border': 'var(--border)',
       '--border-radius': 'var(--radius)',
+      '--success-bg': 'var(--primary)',
+      '--success-text': 'var(--primary-foreground)',
+      '--success-border': 'var(--primary)',
+      '--error-bg': 'var(--destructive)',
+      '--error-text': 'var(--destructive-foreground)',
+      '--error-border': 'var(--destructive)',
     }"
     :toast-options="{
       classes: {
-        toast: 'rounded-2xl',
+        toast: 'rounded-2xl border shadow-lg font-sans',
+        description: 'text-muted-foreground font-medium',
+        actionButton: 'bg-primary text-primary-foreground font-bold rounded-xl',
+        cancelButton: 'bg-muted text-muted-foreground font-bold rounded-xl',
+        success: 'bg-primary text-primary-foreground border-primary',
+        error: 'bg-destructive text-destructive-foreground border-destructive',
       },
     }"
   >

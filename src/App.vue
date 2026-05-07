@@ -23,11 +23,13 @@ const downloadProgress = ref({
 })
 
 const activeTab = ref('downloader')
+const currentTheme = ref<'light' | 'dark' | 'system'>('system')
 let cleanupBinary: (() => void) | null = null
 
 const { locale } = useI18n()
 
 const applyTheme = (tTheme: string) => {
+  currentTheme.value = tTheme as 'light' | 'dark' | 'system'
   const root = window.document.documentElement
   root.classList.remove('light', 'dark')
 
@@ -101,7 +103,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Toaster />
+  <Toaster :theme="currentTheme" />
   <TooltipProvider>
     <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <Titlebar />
