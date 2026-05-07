@@ -158,6 +158,10 @@ function createWindow() {
   
   // Auto-updater IPCs
   ipcMain.handle('check-for-updates', () => {
+    if (!app.isPackaged) {
+      win?.webContents.send('update-error', { message: 'Update check is only available in the packaged application.' })
+      return
+    }
     autoUpdater.checkForUpdatesAndNotify()
   })
 
