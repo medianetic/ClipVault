@@ -50,17 +50,16 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 You can download the latest pre-built binaries for your platform from the [v1.5.0 Release Page](https://github.com/medianetic/ClipVault/releases/tag/v1.5.0).
 
 #### Windows
-- [**ClipVault-Setup-1.5.0.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-Setup-1.5.0.exe) (Installer)
-- [**ClipVault-1.5.0.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.exe) (Portable)
+- [**ClipVault-1.5.0-setup.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-setup.exe) (x64 Installer)
+- [**ClipVault-1.5.0-arm64-setup.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-arm64-setup.exe) (ARM64 Installer)
 
 #### macOS
-- [**ClipVault-1.5.0.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.dmg) (Intel & Apple Silicon)
-- [**ClipVault-1.5.0-mac.zip**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-mac.zip)
+- [**ClipVault-1.5.0-arm64.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-arm64.dmg) (Apple Silicon)
+- [**ClipVault-1.5.0-x64.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-x64.dmg) (Intel)
 
 #### Linux
-- [**ClipVault-1.5.0.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.AppImage)
-- [**clipvault_1.5.0_amd64.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/clipvault_1.5.0_amd64.deb) (Debian/Ubuntu)
-- [**clipvault-1.5.0.x86_64.rpm**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/clipvault-1.5.0.x86_64.rpm) (Fedora/RedHat)
+- [**ClipVault_1.5.0_amd64.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault_1.5.0_amd64.AppImage)
+- [**ClipVault_1.5.0_amd64.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault_1.5.0_amd64.deb) (Debian/Ubuntu)
 
 ### Building from Source
 
