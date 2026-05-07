@@ -49,17 +49,6 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 
 You can download the latest pre-built binaries for your platform from the [v1.5.0 Release Page](https://github.com/medianetic/ClipVault/releases/tag/v1.5.0).
 
-#### Windows
-- [**ClipVault-1.5.0-setup.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-setup.exe) (Installer)
-
-#### macOS
-- [**ClipVault-1.5.0-arm64.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-arm64.dmg) (Apple Silicon)
-- [**ClipVault-1.5.0-x64.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-x64.dmg) (Intel)
-
-#### Linux
-- [**ClipVault-1.5.0.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.AppImage)
-- [**ClipVault-1.5.0.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.deb) (Debian/Ubuntu)
-- [**ClipVault-1.5.0.rpm**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.rpm) (Fedora/RedHat)
 
 ### Building from Source
 
