@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/progress'
 import DownloaderTab from '@/components/DownloaderTab.vue'
 import SettingsTab from '@/components/SettingsTab.vue'
 import { Toaster } from '@/components/ui/sonner'
-import { AlertCircle, Download, X } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
+import { AlertCircle, Download, X, RefreshCw } from 'lucide-vue-next'
 import { version } from '../package.json'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import Titlebar from '@/components/Titlebar.vue'
@@ -25,8 +26,10 @@ const downloadProgress = ref({
 const activeTab = ref('downloader')
 const currentTheme = ref<'light' | 'dark' | 'system'>('system')
 let cleanupBinary: (() => void) | null = null
+let cleanupUpdateAvailable: (() => void) | null = null
+let cleanupUpdateDownloaded: (() => void) | null = null
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const applyTheme = (tTheme: string) => {
   currentTheme.value = tTheme as 'light' | 'dark' | 'system'
@@ -95,10 +98,35 @@ onMounted(async () => {
       downloadProgress.value.ffmpeg.progress = progress
     }
   })
+
+  // Update listeners
+  cleanupUpdateAvailable = window.api.onUpdateAvailable((info: any) => {
+    toast(t('app.update_available'), {
+      description: t('app.update_available_desc', { version: info.version }),
+      duration: 10000,
+      action: {
+        label: t('app.update_check'),
+        onClick: () => window.api.checkForUpdates()
+      }
+    })
+  })
+
+  cleanupUpdateDownloaded = window.api.onUpdateDownloaded(() => {
+    toast.success(t('app.update_downloaded'), {
+      description: t('app.update_downloaded_desc'),
+      duration: Infinity,
+      action: {
+        label: t('app.update_restart'),
+        onClick: () => window.api.restartAndUpdate()
+      }
+    })
+  })
 })
 
 onUnmounted(() => {
   if (cleanupBinary) cleanupBinary()
+  if (cleanupUpdateAvailable) cleanupUpdateAvailable()
+  if (cleanupUpdateDownloaded) cleanupUpdateDownloaded()
 })
 </script>
 

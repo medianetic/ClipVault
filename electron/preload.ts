@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('api', {
   deleteVideo: (filePath: string) => ipcRenderer.invoke('delete-video', filePath),
   deleteBinaries: () => ipcRenderer.invoke('delete-binaries'),
   listVideos: (dirPath?: string) => ipcRenderer.invoke('list-videos', dirPath),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  restartAndUpdate: () => ipcRenderer.invoke('restart-and-update'),
   onBinaryProgress: (callback: any) => {
     const listener = (_event: any, value: any) => callback(value)
     ipcRenderer.on('binary-progress', listener)
@@ -31,6 +33,26 @@ contextBridge.exposeInMainWorld('api', {
     const listener = (_event: any, value: any) => callback(value)
     ipcRenderer.on('settings-changed', listener)
     return () => ipcRenderer.removeListener('settings-changed', listener)
+  },
+  onUpdateAvailable: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('update-available', listener)
+    return () => ipcRenderer.removeListener('update-available', listener)
+  },
+  onUpdateDownloaded: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('update-downloaded', listener)
+    return () => ipcRenderer.removeListener('update-downloaded', listener)
+  },
+  onUpdateError: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('update-error', listener)
+    return () => ipcRenderer.removeListener('update-error', listener)
+  },
+  onUpdateProgress: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('update-download-progress', listener)
+    return () => ipcRenderer.removeListener('update-download-progress', listener)
   },
   minimize: () => ipcRenderer.invoke('window-minimize'),
   maximize: () => ipcRenderer.invoke('window-maximize'),

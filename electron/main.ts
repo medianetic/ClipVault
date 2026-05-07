@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, dialog, shell, protocol } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import { fileURLToPath } from 'node:url'
 
 // Register custom protocols as privileged
@@ -154,6 +155,47 @@ function createWindow() {
     store.set(key, value)
     win?.webContents.send('settings-changed', { key, value })
   })
+  
+  // Auto-updater IPCs
+  ipcMain.handle('check-for-updates', () => {
+    autoUpdater.checkForUpdatesAndNotify()
+  })
+
+  ipcMain.handle('restart-and-update', () => {
+    autoUpdater.quitAndInstall()
+  })
+
+  // Auto-updater events
+  autoUpdater.on('checking-for-update', () => {
+    logger.info('Checking for update...')
+  })
+  
+  autoUpdater.on('update-available', (info) => {
+    logger.info('Update available:', info)
+    win?.webContents.send('update-available', info)
+  })
+  
+  autoUpdater.on('update-not-available', (info) => {
+    logger.info('Update not available:', info)
+  })
+  
+  autoUpdater.on('error', (err) => {
+    logger.error('Error in auto-updater:', err)
+  })
+  
+  autoUpdater.on('download-progress', (progressObj) => {
+    win?.webContents.send('update-download-progress', progressObj)
+  })
+  
+  autoUpdater.on('update-downloaded', (info) => {
+    logger.info('Update downloaded:', info)
+    win?.webContents.send('update-downloaded', info)
+  })
+
+  // Start checking for updates after window is created
+  if (!VITE_DEV_SERVER_URL) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
   ipcMain.handle('log-error', (_event, message, error) => logger.error(message, error))
   ipcMain.handle('check-video-exists', (_event, title, format, audioLang) => downloader.checkFileExists(title, store.get('downloadDir') as string, format, audioLang))
   ipcMain.handle('get-suggested-filename', (_event, title, format, audioLang) => downloader.getSuggestedFilename(title, format, audioLang))

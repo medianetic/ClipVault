@@ -13,7 +13,16 @@ const messages = {
       tab_downloader: 'Downloader',
       tab_settings: 'Settings',
       settings_title: 'Application Settings',
-      settings_desc: 'Manage your preferences and app configuration.'
+      settings_desc: 'Manage your preferences and app configuration.',
+      update_available: 'Update Available',
+      update_available_desc: 'A new version ({version}) is available. Would you like to download it?',
+      update_downloading: 'Downloading update...',
+      update_downloaded: 'Update Downloaded',
+      update_downloaded_desc: 'The update has been downloaded and is ready to install.',
+      update_restart: 'Restart and Update',
+      update_check: 'Check for Updates',
+      update_no_new: 'No Updates Available',
+      update_no_new_desc: 'You are already running the latest version.'
     },
     downloader: {
       paste_link: 'Paste Video Link',
@@ -119,7 +128,16 @@ const messages = {
       tab_downloader: 'Downloader',
       tab_settings: 'Einstellungen',
       settings_title: 'Anwendungseinstellungen',
-      settings_desc: 'Verwalten Sie Ihre Einstellungen und App-Konfiguration.'
+      settings_desc: 'Verwalten Sie Ihre Einstellungen und App-Konfiguration.',
+      update_available: 'Update verfügbar',
+      update_available_desc: 'Eine neue Version ({version}) ist verfügbar. Möchten Sie diese herunterladen?',
+      update_downloading: 'Update wird heruntergeladen...',
+      update_downloaded: 'Update heruntergeladen',
+      update_downloaded_desc: 'Das Update wurde heruntergeladen und ist bereit zur Installation.',
+      update_restart: 'Neu starten und aktualisieren',
+      update_check: 'Nach Updates suchen',
+      update_no_new: 'Keine Updates verfügbar',
+      update_no_new_desc: 'Sie nutzen bereits die neueste Version.'
     },
     downloader: {
       paste_link: 'Video-Link einfügen',

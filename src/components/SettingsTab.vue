@@ -16,6 +16,7 @@ const appLang = ref('en')
 const defaultQuality = ref('best')
 const defaultAudioLang = ref('default')
 const isResetting = ref(false)
+const isCheckingUpdates = ref(false)
 
 const loadSettings = async () => {
   downloadDir.value = await window.api.getStoreValue('downloadDir') || ''
@@ -73,9 +74,9 @@ watch(defaultAudioLang, async (val) => {
 const openExternal = (url: string) => {
   window.api.openExternal(url)
 }
-
 const resetBinaries = async () => {
-  if (window.confirm(t('settings.reset_confirm'))) {
+  const confirmed = window.confirm(t('settings.reset_confirm'))
+  if (confirmed) {
     isResetting.value = true
     await window.api.deleteBinaries()
     // Reload to trigger download check in App.vue
@@ -83,7 +84,24 @@ const resetBinaries = async () => {
   }
 }
 
+const checkForUpdates = async () => {
+  isCheckingUpdates.value = true
+  try {
+    await window.api.checkForUpdates()
+    // We don't need to do anything else here as the listeners in App.vue will handle the response
+    // But we can show a temporary toast
+    toast.info(t('app.update_check'))
+  } catch (e) {
+    console.error('Failed to check for updates:', e)
+  } finally {
+    setTimeout(() => {
+      isCheckingUpdates.value = false
+    }, 1000)
+  }
+}
+
 onMounted(loadSettings)
+
 </script>
 
 <template>
@@ -256,7 +274,19 @@ onMounted(loadSettings)
       <div class="pl-10 space-y-4">
         <div class="p-3 bg-muted/30 rounded-xl border border-border/50">
           <p class="text-sm font-bold text-foreground">ClipVault</p>
-          <p class="text-[10px] text-muted-foreground mt-0.5">{{ $t('settings.version', { version }) }}</p>
+          <div class="flex items-center justify-between mt-0.5">
+            <p class="text-[10px] text-muted-foreground">{{ $t('settings.version', { version }) }}</p>
+            <Button 
+              variant="ghost" 
+              size="xs" 
+              class="h-6 px-2 rounded-lg text-[9px] font-black uppercase tracking-wider"
+              @click="checkForUpdates"
+              :disabled="isCheckingUpdates"
+            >
+              <RefreshCcw class="mr-1.5 h-3 w-3" :class="{ 'animate-spin': isCheckingUpdates }" />
+              {{ $t('app.update_check') }}
+            </Button>
+          </div>
           <p class="text-[11px] text-muted-foreground mt-2 leading-relaxed">
             {{ $t('settings.desc') }}
           </p>
