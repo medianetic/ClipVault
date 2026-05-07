@@ -5,12 +5,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { 
-  Search, Download, Loader2, CheckCircle2, AlertCircle, Youtube, Languages, Settings2, 
+  Search, Download, Loader2, CheckCircle2, AlertCircle, Youtube, Settings2, 
   PlayCircle, Folder, LayoutGrid, List, Trash2, ArrowUpDown, Clock, HardDrive, Filter, X,
-  Music, Film
+  Music, Film, Link
 } from 'lucide-vue-next'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { 
@@ -29,6 +28,7 @@ interface VideoItem {
   thumbnail?: string | null
   duration?: number
   type: 'video' | 'audio'
+  url?: string | null
 }
 
 interface DownloadItem {
@@ -49,8 +49,7 @@ const url = ref('')
 const loadingMetadata = ref(false)
 const metadata = ref<any>(null)
 const selectedFormat = ref('best')
-const enableSubtitles = ref(false)
-const selectedSubLang = ref('en')
+const selectedAudioLang = ref('default')
 const activeDownloads = ref<DownloadItem[]>([])
 const localVideos = ref<VideoItem[]>([])
 const error = ref('')
@@ -137,7 +136,9 @@ const loadLocalVideos = async () => {
     const videos = await window.api.listVideos()
     localVideos.value = videos
   } catch (e) {
-    toast.error(t('downloader.error_list'))
+    toast.error(t('downloader.failed'), {
+      description: t('downloader.error_list')
+    })
   }
 }
 
@@ -155,7 +156,9 @@ const fetchMetadata = async () => {
   
   if (!isValidUrl(url.value)) {
     error.value = t('downloader.error_invalid_url')
-    toast.error(t('downloader.error_invalid_url'))
+    toast.error(t('downloader.failed'), {
+      description: t('downloader.error_invalid_url')
+    })
     return
   }
 
@@ -174,7 +177,9 @@ const fetchMetadata = async () => {
     } else {
       error.value = t('downloader.error_metadata')
     }
-    toast.error(error.value)
+    toast.error(t('downloader.failed'), {
+      description: error.value
+    })
   } finally {
     loadingMetadata.value = false
   }
@@ -183,7 +188,7 @@ const fetchMetadata = async () => {
 const startDownload = async () => {
   if (!metadata.value) return
 
-  const exists = await window.api.checkVideoExists(metadata.value.title, selectedFormat.value)
+  const exists = await window.api.checkVideoExists(metadata.value.title, selectedFormat.value, selectedAudioLang.value)
   if (exists) {
     const confirmDownload = window.confirm(`"${metadata.value.title}" already exists in your library. Do you want to download it again?`)
     if (!confirmDownload) return
@@ -207,8 +212,7 @@ const startDownload = async () => {
     url: currentUrl,
     title: currentTitle,
     format: selectedFormat.value,
-    subtitles: enableSubtitles.value,
-    subtitleLang: selectedSubLang.value
+    audioLang: selectedAudioLang.value
   }
 
   url.value = ''
@@ -222,7 +226,9 @@ const startDownload = async () => {
       item.progress = 100
       item.filePath = result.filePath
     }
-    toast.success(t('downloader.success_download', { title: currentTitle }))
+    toast.success(t('downloader.success'), {
+      description: t('downloader.success_download', { title: currentTitle })
+    })
     await loadLocalVideos()
   } catch (e: any) {
     const item = activeDownloads.value.find(d => d.url === currentUrl)
@@ -230,7 +236,9 @@ const startDownload = async () => {
       item.status = 'error'
       item.error = e.message
     }
-    toast.error(t('downloader.error_download'))
+    toast.error(t('downloader.failed'), {
+      description: t('downloader.error_download')
+    })
   }
 }
 
@@ -246,6 +254,15 @@ const openFolder = (filePath?: string) => {
   }
 }
 
+const copyUrl = (url?: string | null) => {
+  if (url) {
+    navigator.clipboard.writeText(url)
+    toast.success(t('downloader.success'), {
+      description: t('downloader.success_copy_url')
+    })
+  }
+}
+
 const confirmDelete = (video: VideoItem) => {
   videoToDelete.value = video
 }
@@ -256,12 +273,16 @@ const deleteVideo = async () => {
   try {
     const success = await window.api.deleteVideo(videoToDelete.value.path)
     if (success) {
-      toast.success(t('downloader.success_delete'))
+      toast.success(t('downloader.success'), {
+        description: t('downloader.success_delete')
+      })
       await loadLocalVideos()
       videoToDelete.value = null
     }
   } catch (e) {
-    toast.error(t('downloader.error_delete'))
+    toast.error(t('downloader.failed'), {
+      description: t('downloader.error_delete')
+    })
   } finally {
     isDeleting.value = false
   }
@@ -280,11 +301,8 @@ onMounted(async () => {
   const defQuality = await window.api.getStoreValue('defaultQuality')
   if (defQuality) selectedFormat.value = defQuality
   
-  const defSubtitles = await window.api.getStoreValue('defaultSubtitles')
-  if (defSubtitles !== undefined) enableSubtitles.value = defSubtitles
-  
-  const defSubLang = await window.api.getStoreValue('defaultSubLang')
-  if (defSubLang) selectedSubLang.value = defSubLang
+  const defAudioLang = await window.api.getStoreValue('defaultAudioLang')
+  if (defAudioLang) selectedAudioLang.value = defAudioLang
 
   window.api.onDownloadProgress(({ url, progress }) => {
     const item = activeDownloads.value.find(d => d.url === url)
@@ -382,20 +400,17 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                   </Select>
                 </div>
                 <div class="space-y-2">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">
-                      <Languages class="h-3 w-3" /> {{ $t('downloader.subtitles') }}
-                    </div>
-                    <Switch v-model:checked="enableSubtitles" class="scale-75 origin-right" />
+                  <div class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">
+                    <Music class="h-3 w-3" /> {{ $t('downloader.audio_language') }}
                   </div>
-                  <Select v-model="selectedSubLang" :disabled="!enableSubtitles">
-                    <SelectTrigger class="bg-background/50 border-none shadow-sm h-9 text-xs font-medium rounded-lg disabled:opacity-40">
-                      <SelectValue :placeholder="$t('downloader.language')" />
+                  <Select v-model="selectedAudioLang">
+                    <SelectTrigger class="bg-background/50 border-none shadow-sm h-9 text-xs font-medium rounded-lg">
+                      <SelectValue :placeholder="$t('downloader.audio_language')" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="default">{{ $t('downloader.original_best') }}</SelectItem>
                       <SelectItem value="en">{{ $t('downloader.lang_en') }}</SelectItem>
                       <SelectItem value="de">{{ $t('downloader.lang_de') }}</SelectItem>
-                      <SelectItem value="fr">{{ $t('downloader.lang_fr') }}</SelectItem>
                       <SelectItem value="es">{{ $t('downloader.lang_es') }}</SelectItem>
                     </SelectContent>
                   </Select>
@@ -672,6 +687,20 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                         </TooltipTrigger>
                         <TooltipContent><p class="text-[10px] font-bold uppercase tracking-widest">{{ $t('downloader.open_folder') }}</p></TooltipContent>
                       </Tooltip>
+
+                      <Tooltip v-if="video.url">
+                        <TooltipTrigger as-child>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            class="h-8 w-8 rounded-lg hover:bg-primary/10 text-primary transition-all active:scale-90" 
+                            @click="copyUrl(video.url)"
+                          >
+                            <Link class="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p class="text-[10px] font-bold uppercase tracking-widest">{{ $t('downloader.copy_url') || 'Copy Original URL' }}</p></TooltipContent>
+                      </Tooltip>
                     </div>
 
                     <Tooltip>
@@ -726,6 +755,15 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent><p class="text-[9px] font-black uppercase tracking-widest">{{ $t('downloader.open_folder') }}</p></TooltipContent>
+              </Tooltip>
+
+              <Tooltip v-if="video.url">
+                <TooltipTrigger as-child>
+                  <Button variant="ghost" size="icon" class="h-7 w-7 rounded-lg hover:bg-primary/10 text-primary" @click="copyUrl(video.url)">
+                    <Link class="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p class="text-[9px] font-black uppercase tracking-widest">{{ $t('downloader.copy_url') || 'Copy URL' }}</p></TooltipContent>
               </Tooltip>
 
               <Tooltip>

@@ -39,7 +39,7 @@ ClipVault is a modern, high-performance desktop application built with Electron 
   - **Sleek Audio Cards**: Audio files feature a dedicated "black card" design with animated visualizers and music icons.
   - **Context-Aware Controls**: Labels dynamically switch between "Play" (for audio) and "View" (for video).
 - **Automated Dependency Management**: ClipVault automatically handles the setup and updates for `yt-dlp` and `FFmpeg` on first run.
-- **Subtitle Support**: Select and embed subtitles in multiple languages directly into your downloads.
+- **Multi-Audio Support**: Select your preferred audio language (e.g., AI-dubbed tracks) for YouTube downloads.
 - **Integrated Library**: Track and manage your download history and local library directly within the application.
 - **Persistent Settings**: Custom download directories and preferences are managed via a secure local store.
 

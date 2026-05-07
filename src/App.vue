@@ -101,8 +101,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <Toaster />
   <TooltipProvider>
-    <Toaster />
     <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <Titlebar />
       <div v-if="checkingBinaries" class="flex items-center justify-center flex-1">

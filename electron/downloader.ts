@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import Store from 'electron-store'
 import type { BrowserWindow } from 'electron'
 import type { BinaryManager } from './binaryManager'
+import { logger } from './logger'
 
 export class Downloader {
   constructor(private binaryManager: BinaryManager) {}
@@ -29,30 +30,44 @@ export class Downloader {
           try {
             resolve(JSON.parse(stdout))
           } catch (e) {
+            logger.error(`Failed to parse metadata for URL: ${url}`, e)
             reject(new Error('Failed to parse metadata'))
           }
-        } else {
+          } else {
+          logger.error(`yt-dlp metadata fetch failed for URL: ${url} with code ${code}`, { stderr })
           reject(new Error(stderr || `yt-dlp exited with code ${code}`))
         }
       })
     })
   }
 
+  getSuggestedFilename(title: string, format?: string, audioLang?: string): string {
+    const safeFilename = this.sanitizeFilename(title)
+    let finalTitle = safeFilename
+    if (format === 'bestaudio') {
+      finalTitle += '_audio'
+    }
+    if (audioLang && audioLang !== 'default') {
+      finalTitle += `_${audioLang}`
+    }
+    return finalTitle
+  }
+
   async download(options: {
     url: string,
     title?: string,
+    overrideTitle?: string,
     format: string,
     outputDir: string,
-    subtitles?: boolean,
-    subtitleLang?: string,
+    audioLang?: string,
     win: BrowserWindow
   }) {
-    const { url, title, format, outputDir, subtitles, subtitleLang, win } = options
+    const { url, title, overrideTitle, format, outputDir, audioLang, win } = options
     const ytDlpPath = this.binaryManager.getYTIDlpPath()
     const ffmpegPath = this.binaryManager.getFFmpegPath()
 
     let displayTitle = title
-    if (!displayTitle) {
+    if (!displayTitle && !overrideTitle) {
       try {
         const metadata = await this.getMetadata(url) as any
         displayTitle = metadata.title || 'video'
@@ -61,31 +76,34 @@ export class Downloader {
       }
     }
 
-    let sanitizedTitle = this.sanitizeFilename(displayTitle!)
-    if (format === 'bestaudio') {
-      sanitizedTitle += '-audio-only'
-    }
-    const outputTemplate = `${outputDir}/${sanitizedTitle}.%(ext)s`
+    const finalTitle = overrideTitle || this.getSuggestedFilename(displayTitle!, format, audioLang)
+    const outputTemplate = `${outputDir}/${finalTitle}.%(ext)s`
 
     const args = [
       '--ffmpeg-location', ffmpegPath,
       '--output', outputTemplate,
       '--progress',
-      '--newline'
+      '--newline',
+      '--add-metadata'
     ]
 
-    if (format !== 'best') {
-      if (format === 'bestaudio') {
-        args.push('--extract-audio', '--audio-format', 'mp3')
-      } else {
-        args.unshift('--format', format)
+    // Construct format string with language priority if specified
+    let formatStr = format
+    if (audioLang && audioLang !== 'default') {
+      if (format === 'best' || format === 'bestvideo+bestaudio') {
+        formatStr = `bestvideo+bestaudio[language=${audioLang}]/bestvideo+bestaudio/best`
+      } else if (format === 'mp4') {
+        formatStr = `bestvideo[ext=mp4]+bestaudio[ext=m4a][language=${audioLang}]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
+      } else if (format === 'bestaudio') {
+        formatStr = `bestaudio[language=${audioLang}]/bestaudio/best`
       }
     }
 
-    if (subtitles) {
-      args.push('--write-subs')
-      if (subtitleLang) {
-        args.push('--sub-langs', subtitleLang)
+    if (formatStr !== 'best') {
+      if (format === 'bestaudio') {
+        args.push('--format', formatStr, '--extract-audio', '--audio-format', 'mp3')
+      } else {
+        args.push('--format', formatStr)
       }
     }
 
@@ -97,15 +115,9 @@ export class Downloader {
       const getFilenameArgs = [
         '--output', outputTemplate,
         '--get-filename',
+        '--format', formatStr,
         url
       ]
-      if (format !== 'best') {
-        if (format === 'bestaudio') {
-          getFilenameArgs.push('--extract-audio', '--audio-format', 'mp3')
-        } else {
-          getFilenameArgs.unshift('--format', format)
-        }
-      }
       
       const getFilenameProcess = spawn(ytDlpPath, getFilenameArgs)
       
@@ -121,7 +133,7 @@ export class Downloader {
         })
       })
     } catch (e) {
-      console.error('Failed to get filename:', e)
+      logger.error('Failed to get filename', e)
     }
 
     const downloadProcess = spawn(ytDlpPath, args)
@@ -129,8 +141,6 @@ export class Downloader {
 
     downloadProcess.stdout.on('data', (data) => {
       const line = data.toString()
-      // Parse progress from yt-dlp output
-      // Example: [download]  10.0% of 100.00MiB at 10.00MiB/s ETA 00:10
       const match = line.match(/\[download\]\s+(\d+\.\d+)%/)
       if (match) {
         const progress = parseFloat(match[1])
@@ -140,7 +150,6 @@ export class Downloader {
 
     downloadProcess.stderr.on('data', (data) => {
       stderr += data.toString()
-      console.error(`yt-dlp stderr: ${data}`)
     })
 
     return new Promise((resolve, reject) => {
@@ -148,8 +157,14 @@ export class Downloader {
         if (code === 0) {
           resolve({ success: true, filePath: finalPath })
         } else {
-          reject(new Error(`Download failed with code ${code}: ${stderr}`))
+          logger.error(`yt-dlp download failed for URL: ${url} with code ${code}`, { stderr, args })
+          reject(new Error(stderr || `yt-dlp exited with code ${code}`))
         }
+      })
+
+      downloadProcess.on('error', (err) => {
+        logger.error('yt-dlp process error', err)
+        reject(err)
       })
     })
   }
@@ -170,22 +185,20 @@ export class Downloader {
     return sanitized
       .normalize('NFD') // Decompose combined characters
       .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-      .replace(/[^a-zA-Z0-9]/g, '_') // Replace non-alphanumeric with underscore
+      .replace(/[^a-zA-Z0-9_-]/g, '_') // Replace EVERYTHING ELSE with underscore (added hyphen)
       .replace(/_+/g, '_') // Collapse multiple underscores
       .replace(/^_+|_+$/g, ''); // Trim leading/trailing underscores
   }
 
-  async checkFileExists(title: string, outputDir: string, format?: string): Promise<boolean> {
+  async checkFileExists(title: string, outputDir: string, format?: string, audioLang?: string): Promise<boolean> {
     try {
-      let sanitizedTitle = this.sanitizeFilename(title)
-      if (format === 'bestaudio') {
-        sanitizedTitle += '-audio-only'
-      }
+      const finalTitle = this.getSuggestedFilename(title, format, audioLang)
       const folder = outputDir || (new Store()).get('downloadDir') as string || app.getPath('downloads')
       const files = await fs.readdir(folder)
-      // Check if any file starts with the sanitized title (ignoring extension for simplicity/safety)
-      return files.some(f => f.startsWith(sanitizedTitle + '.'))
+      // Check if any file starts with the final title (ignoring extension for simplicity/safety)
+      return files.some(f => f.startsWith(finalTitle + '.'))
     } catch (e) {
+      logger.error(`Failed to check if file exists for title: ${title}, outputDir: ${outputDir}`, e)
       return false
     }
   }

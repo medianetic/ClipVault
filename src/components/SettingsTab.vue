@@ -3,7 +3,6 @@ import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FolderOpen, Moon, Sun, Monitor, HardDrive, Palette, Info, ExternalLink, User, Settings2, Globe, RefreshCcw, AlertTriangle } from 'lucide-vue-next'
 import { version } from '../../package.json'
@@ -15,8 +14,7 @@ const downloadDir = ref('')
 const theme = ref('system')
 const appLang = ref('en')
 const defaultQuality = ref('best')
-const defaultSubtitles = ref(false)
-const defaultSubLang = ref('en')
+const defaultAudioLang = ref('default')
 const isResetting = ref(false)
 
 const loadSettings = async () => {
@@ -24,8 +22,7 @@ const loadSettings = async () => {
   theme.value = await window.api.getStoreValue('theme') || 'system'
   appLang.value = await window.api.getStoreValue('language') || 'en'
   defaultQuality.value = await window.api.getStoreValue('defaultQuality') || 'best'
-  defaultSubtitles.value = await window.api.getStoreValue('defaultSubtitles') || false
-  defaultSubLang.value = await window.api.getStoreValue('defaultSubLang') || 'en'
+  defaultAudioLang.value = await window.api.getStoreValue('defaultAudioLang') || 'default'
   applyTheme(theme.value)
   locale.value = appLang.value
 }
@@ -69,12 +66,8 @@ watch(defaultQuality, async (val) => {
   await window.api.setStoreValue('defaultQuality', val)
 })
 
-watch(defaultSubtitles, async (val) => {
-  await window.api.setStoreValue('defaultSubtitles', val)
-})
-
-watch(defaultSubLang, async (val) => {
-  await window.api.setStoreValue('defaultSubLang', val)
+watch(defaultAudioLang, async (val) => {
+  await window.api.setStoreValue('defaultAudioLang', val)
 })
 
 const openExternal = (url: string) => {
@@ -205,18 +198,15 @@ onMounted(loadSettings)
             </Select>
           </div>
           <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-muted-foreground uppercase tracking-wider text-[9px]">{{ $t('settings.enable_subtitles') }}</label>
-              <Switch v-model:checked="defaultSubtitles" class="h-4 w-7" />
-            </div>
-            <Select v-model="defaultSubLang" :disabled="!defaultSubtitles">
-              <SelectTrigger class="bg-muted/50 border-none shadow-inner h-10 text-xs disabled:opacity-40">
-                <SelectValue :placeholder="$t('downloader.language')" />
+            <label class="font-bold text-muted-foreground uppercase tracking-wider text-[9px]">{{ $t('settings.default_audio_lang') }}</label>
+            <Select v-model="defaultAudioLang">
+              <SelectTrigger class="bg-muted/50 border-none shadow-inner h-10 text-xs">
+                <SelectValue :placeholder="$t('downloader.audio_language')" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="default">{{ $t('downloader.original_best') }}</SelectItem>
                 <SelectItem value="en">{{ $t('downloader.lang_en') }}</SelectItem>
                 <SelectItem value="de">{{ $t('downloader.lang_de') }}</SelectItem>
-                <SelectItem value="fr">{{ $t('downloader.lang_fr') }}</SelectItem>
                 <SelectItem value="es">{{ $t('downloader.lang_es') }}</SelectItem>
               </SelectContent>
             </Select>

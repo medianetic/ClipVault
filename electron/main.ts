@@ -8,6 +8,7 @@ protocol.registerSchemesAsPrivileged([
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import Store from 'electron-store'
+import { logger } from './logger'
 import { BinaryManager } from './binaryManager'
 import { Downloader } from './downloader'
 import { ThumbnailManager } from './thumbnailManager'
@@ -21,11 +22,11 @@ const thumbnailManager = new ThumbnailManager(binaryManager)
 
 // Global Exception Handlers
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error)
+  logger.error('Uncaught Exception', error)
 })
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+  logger.error('Unhandled Rejection', { reason, promise })
 })
 
 // Register thumb protocol
@@ -120,7 +121,13 @@ function createWindow() {
       outputDir: options.outputDir || store.get('downloadDir') || app.getPath('downloads'),
       win: win!
     }
-    return await downloader.download(downloadOptions)
+    const result = (await downloader.download(downloadOptions)) as any
+    if (result.success && result.filePath) {
+      const videoUrls = (store.get('videoUrls') || {}) as Record<string, string>
+      videoUrls[result.filePath] = options.url
+      store.set('videoUrls', videoUrls)
+    }
+    return result
   })
 
   ipcMain.handle('select-directory', async () => {
@@ -135,23 +142,43 @@ function createWindow() {
 
   ipcMain.handle('get-store-value', (_event, key) => store.get(key))
   ipcMain.handle('set-store-value', (_event, key, value) => store.set(key, value))
-  ipcMain.handle('check-video-exists', (_event, title, format) => downloader.checkFileExists(title, store.get('downloadDir') as string, format))
+  ipcMain.handle('log-error', (_event, message, error) => logger.error(message, error))
+  ipcMain.handle('check-video-exists', (_event, title, format, audioLang) => downloader.checkFileExists(title, store.get('downloadDir') as string, format, audioLang))
+  ipcMain.handle('get-suggested-filename', (_event, title, format, audioLang) => downloader.getSuggestedFilename(title, format, audioLang))
   ipcMain.handle('open-external', (_event, url) => shell.openExternal(url))
   ipcMain.handle('open-file', (_event, filePath) => shell.openPath(filePath))
   ipcMain.handle('open-folder', (_event, filePath) => shell.showItemInFolder(filePath))
   ipcMain.handle('delete-video', async (_event, filePath) => {
     try {
       await fs.unlink(filePath)
+      const videoUrls = (store.get('videoUrls') || {}) as Record<string, string>
+      if (videoUrls[filePath]) {
+        delete videoUrls[filePath]
+        store.set('videoUrls', videoUrls)
+      }
       return true
     } catch (e) {
-      console.error('Failed to delete video:', e)
+      logger.error('Failed to delete video', e)
       throw e
     }
   })
 
   ipcMain.handle('list-videos', async (_event, dirPath) => {
     try {
-      const folder = dirPath || store.get('downloadDir') || app.getPath('downloads')
+      let folder = dirPath || store.get('downloadDir') as string || app.getPath('downloads')
+      
+      // Ensure the folder exists, otherwise fallback to system downloads
+      try {
+        await fs.access(folder)
+      } catch (e) {
+        folder = app.getPath('downloads')
+        try {
+          await fs.access(folder)
+        } catch (e2) {
+          return [] // Both failed
+        }
+      }
+      
       const files = await fs.readdir(folder)
       const videoExtensions = ['.mp4', '.mkv', '.webm', '.avi', '.mov']
       const audioExtensions = ['.m4a', '.mp3', '.wav', '.flac', '.ogg']
@@ -177,6 +204,7 @@ function createWindow() {
             mtime: stats.mtime,
             thumbnail: thumb ? `thumb://${thumb}` : null,
             duration: metadata?.duration || 0,
+            url: metadata?.url || (store.get('videoUrls') as any)?.[fullPath] || null,
             type: isVideo ? 'video' : 'audio'
           }
         }
@@ -188,7 +216,7 @@ function createWindow() {
       // Sort by modified time descending
       return videos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
     } catch (e) {
-      console.error('Failed to list videos:', e)
+      logger.error('Failed to list videos', e)
       throw e
     }
   })

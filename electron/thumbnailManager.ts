@@ -101,13 +101,13 @@ export class ThumbnailManager {
     })
   }
 
-  async getVideoMetadata(videoPath: string): Promise<{ duration: number } | null> {
+  async getVideoMetadata(videoPath: string): Promise<{ duration: number, url?: string } | null> {
     return new Promise((resolve) => {
       const ffprobePath = this.binaryManager.getFFprobePath()
       const args = [
         '-v', 'error',
-        '-show_entries', 'format=duration',
-        '-of', 'default=noprint_wrappers=1:nokey=1',
+        '-show_entries', 'format=duration:format_tags',
+        '-of', 'json',
         videoPath
       ]
 
@@ -120,8 +120,18 @@ export class ThumbnailManager {
 
       ffprobe.on('close', (code) => {
         if (code === 0) {
-          const duration = parseFloat(output.trim())
-          resolve({ duration })
+          try {
+            const data = JSON.parse(output)
+            const duration = parseFloat(data.format?.duration || '0')
+            const tags = data.format?.tags || {}
+            
+            // yt-dlp often embeds the URL in these tags
+            const url = tags.comment || tags.purl || tags.webpage_url || tags.description
+            
+            resolve({ duration, url })
+          } catch (e) {
+            resolve({ duration: 0 })
+          }
         } else {
           resolve(null)
         }

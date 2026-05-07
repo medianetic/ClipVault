@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('api', {
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   getStoreValue: (key: string) => ipcRenderer.invoke('get-store-value', key),
   setStoreValue: (key: string, value: any) => ipcRenderer.invoke('set-store-value', key, value),
-  checkVideoExists: (title: string, format?: string) => ipcRenderer.invoke('check-video-exists', title, format),
+  checkVideoExists: (title: string, format?: string, audioLang?: string) => ipcRenderer.invoke('check-video-exists', title, format, audioLang),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
   openFolder: (filePath: string) => ipcRenderer.invoke('open-folder', filePath),

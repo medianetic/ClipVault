@@ -24,6 +24,8 @@ const messages = {
       remux: 'Remux (Best Video+Audio)',
       mp4_format: 'MP4 Format',
       audio_only: 'Audio Only (MP3/M4A)',
+      audio_language: 'Audio Language',
+      original_best: 'Original / Best',
       subtitles: 'Subtitles',
       language: 'Language',
       lang_en: 'English',
@@ -65,6 +67,7 @@ const messages = {
       library: 'Library',
       file: 'File | Files',
       view_video: 'View Video',
+      copy_url: 'Copy Original URL',
       error_delete: 'Failed to delete video. The file might be in use.',
       error_list: 'Failed to load library. Please check your download directory settings.',
       error_metadata: 'Failed to fetch video details. Please check the URL.',
@@ -72,7 +75,8 @@ const messages = {
       error_download: 'Download failed. See recent activity for details.',
       error_binary_check: 'Failed to verify dependencies. Please restart the app.',
       success_delete: 'Video deleted successfully.',
-      success_download: 'Download completed: {title}'
+      success_download: 'Download completed: {title}',
+      success_copy_url: 'URL copied to clipboard!'
     },
     settings: {
       storage: 'Storage',
@@ -89,7 +93,7 @@ const messages = {
       system_default: 'System Default',
       download_prefs: 'Download Preferences',
       default_quality: 'Default Quality',
-      enable_subtitles: 'Enable Subtitles',
+      default_audio_lang: 'Default Audio Language',
       troubleshooting: 'Troubleshooting',
       reset_deps: 'Reset Dependencies',
       reset_deps_desc: 'Delete and re-download yt-dlp and FFmpeg. Use this if downloads are failing or tools are corrupted.',
@@ -126,6 +130,8 @@ const messages = {
       remux: 'Remux (Bestes Video+Audio)',
       mp4_format: 'MP4 Format',
       audio_only: 'Nur Audio (MP3/M4A)',
+      audio_language: 'Audiosprache',
+      original_best: 'Original / Beste',
       subtitles: 'Untertitel',
       language: 'Sprache',
       lang_en: 'Englisch',
@@ -167,6 +173,7 @@ const messages = {
       library: 'Bibliothek',
       file: 'Datei | Dateien',
       view_video: 'Video ansehen',
+      copy_url: 'Original-Link kopieren',
       error_delete: 'Video konnte nicht gelöscht werden. Die Datei wird eventuell verwendet.',
       error_list: 'Bibliothek konnte nicht geladen werden. Bitte prüfen Sie die Download-Verzeichnis-Einstellungen.',
       error_metadata: 'Details konnten nicht abgerufen werden. Bitte prüfen Sie die URL.',
@@ -174,7 +181,8 @@ const messages = {
       error_download: 'Download fehlgeschlagen. Siehe letzte Aktivität für Details.',
       error_binary_check: 'Abhängigkeiten konnten nicht überprüft werden. Bitte starten Sie die App neu.',
       success_delete: 'Video erfolgreich gelöscht.',
-      success_download: 'Download abgeschlossen: {title}'
+      success_download: 'Download abgeschlossen: {title}',
+      success_copy_url: 'URL in die Zwischenablage kopiert!'
     },
     settings: {
       storage: 'Speicherort',
@@ -191,7 +199,7 @@ const messages = {
       system_default: 'Systemstandard',
       download_prefs: 'Download-Einstellungen',
       default_quality: 'Standardqualität',
-      enable_subtitles: 'Untertitel aktivieren',
+      default_audio_lang: 'Standard-Audiosprache',
       troubleshooting: 'Fehlerbehebung',
       reset_deps: 'Abhängigkeiten zurücksetzen',
       reset_deps_desc: 'Löschen und erneutes Herunterladen von yt-dlp und FFmpeg. Nutzen Sie dies, wenn Downloads fehlschlagen oder Tools beschädigt sind.',
@@ -228,6 +236,8 @@ const messages = {
       remux: 'Remux (Mejor Video+Audio)',
       mp4_format: 'Formato MP4',
       audio_only: 'Solo audio (MP3/M4A)',
+      audio_language: 'Idioma del audio',
+      original_best: 'Original / Mejor',
       subtitles: 'Subtítulos',
       language: 'Idioma',
       lang_en: 'Inglés',
@@ -269,6 +279,7 @@ const messages = {
       library: 'Biblioteca',
       file: 'Archivo | Archivos',
       view_video: 'Ver video',
+      copy_url: 'Copiar enlace original',
       error_delete: 'Error al eliminar el video. El archivo podría estar en uso.',
       error_list: 'Error al cargar la biblioteca. Por favor, compruebe los ajustes del directorio de descarga.',
       error_metadata: 'Error al obtener los detalles del video. Por favor, compruebe la URL.',
@@ -276,7 +287,8 @@ const messages = {
       error_download: 'La descarga falló. Consulte la actividad reciente para más detalles.',
       error_binary_check: 'Error al verificar las dependencias. Por favor, reinicie la aplicación.',
       success_delete: 'Video eliminado con éxito.',
-      success_download: 'Descarga completada: {title}'
+      success_download: 'Descarga completada: {title}',
+      success_copy_url: '¡URL copiada al portapapeles!'
     },
     settings: {
       storage: 'Almacenamiento',
@@ -293,7 +305,7 @@ const messages = {
       system_default: 'Predeterminado del sistema',
       download_prefs: 'Preferencias de descarga',
       default_quality: 'Calidad predeterminada',
-      enable_subtitles: 'Activar subtítulos',
+      default_audio_lang: 'Idioma de audio predeterminado',
       troubleshooting: 'Solución de problemas',
       reset_deps: 'Restablecer dependencias',
       reset_deps_desc: 'Elimine y vuelva a descargar yt-dlp y FFmpeg. Use esto si las descargas fallan o las herramientas están dañadas.',

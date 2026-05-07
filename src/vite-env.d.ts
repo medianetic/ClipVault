@@ -11,7 +11,7 @@ interface Window {
     selectDirectory: () => Promise<string | null>
     getStoreValue: (key: string) => Promise<any>
     setStoreValue: (key: string, value: any) => Promise<void>
-    checkVideoExists: (title: string, format?: string) => Promise<boolean>
+    checkVideoExists: (title: string, format?: string, audioLang?: string) => Promise<boolean>
     openExternal: (url: string) => Promise<void>
     openFile: (filePath: string) => Promise<void>
     openFolder: (filePath: string) => Promise<void>
