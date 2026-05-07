@@ -177,10 +177,12 @@ function createWindow() {
   
   autoUpdater.on('update-not-available', (info) => {
     logger.info('Update not available:', info)
+    win?.webContents.send('update-not-available', info)
   })
   
   autoUpdater.on('error', (err) => {
     logger.error('Error in auto-updater:', err)
+    win?.webContents.send('update-error', err)
   })
   
   autoUpdater.on('download-progress', (progressObj) => {

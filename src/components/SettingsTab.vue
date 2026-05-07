@@ -89,8 +89,7 @@ const checkForUpdates = async () => {
   try {
     await window.api.checkForUpdates()
     // We don't need to do anything else here as the listeners in App.vue will handle the response
-    // But we can show a temporary toast
-    toast.info(t('app.update_check'))
+    toast.info(t('app.update_downloading').replace('...', ''))
   } catch (e) {
     console.error('Failed to check for updates:', e)
   } finally {

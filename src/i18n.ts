@@ -243,7 +243,16 @@ const messages = {
       tab_downloader: 'Descargador',
       tab_settings: 'Ajustes',
       settings_title: 'Ajustes de la aplicación',
-      settings_desc: 'Gestione sus preferencias y la configuración de la aplicación.'
+      settings_desc: 'Gestione sus preferencias y la configuración de la aplicación.',
+      update_available: 'Actualización disponible',
+      update_available_desc: 'Una nueva versión ({version}) está disponible. ¿Desea descargarla?',
+      update_downloading: 'Descargando actualización...',
+      update_downloaded: 'Actualización descargada',
+      update_downloaded_desc: 'La actualización se ha descargado y está lista para instalar.',
+      update_restart: 'Reiniciar y actualizar',
+      update_check: 'Buscar actualizaciones',
+      update_no_new: 'No hay actualizaciones disponibles',
+      update_no_new_desc: 'Ya está utilizando la última versión.'
     },
     downloader: {
       paste_link: 'Pegue el enlace del video',

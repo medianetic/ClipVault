@@ -39,6 +39,11 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('update-available', listener)
     return () => ipcRenderer.removeListener('update-available', listener)
   },
+  onUpdateNotAvailable: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('update-not-available', listener)
+    return () => ipcRenderer.removeListener('update-not-available', listener)
+  },
   onUpdateDownloaded: (callback: any) => {
     const listener = (_event: any, value: any) => callback(value)
     ipcRenderer.on('update-downloaded', listener)

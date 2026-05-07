@@ -27,7 +27,9 @@ const activeTab = ref('downloader')
 const currentTheme = ref<'light' | 'dark' | 'system'>('system')
 let cleanupBinary: (() => void) | null = null
 let cleanupUpdateAvailable: (() => void) | null = null
+let cleanupUpdateNotAvailable: (() => void) | null = null
 let cleanupUpdateDownloaded: (() => void) | null = null
+let cleanupUpdateError: (() => void) | null = null
 
 const { locale, t } = useI18n()
 
@@ -121,12 +123,28 @@ onMounted(async () => {
       }
     })
   })
+
+  cleanupUpdateNotAvailable = window.api.onUpdateNotAvailable(() => {
+    toast.info(t('app.update_no_new'), {
+      description: t('app.update_no_new_desc'),
+      duration: 5000
+    })
+  })
+
+  cleanupUpdateError = window.api.onUpdateError((err: any) => {
+    toast.error('Update Error', {
+      description: err?.message || 'Failed to check for updates.',
+      duration: 5000
+    })
+  })
 })
 
 onUnmounted(() => {
   if (cleanupBinary) cleanupBinary()
   if (cleanupUpdateAvailable) cleanupUpdateAvailable()
+  if (cleanupUpdateNotAvailable) cleanupUpdateNotAvailable()
   if (cleanupUpdateDownloaded) cleanupUpdateDownloaded()
+  if (cleanupUpdateError) cleanupUpdateError()
 })
 </script>
 
