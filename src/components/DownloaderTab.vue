@@ -289,7 +289,7 @@ onMounted(async () => {
   window.api.onDownloadProgress(({ url, progress }) => {
     const item = activeDownloads.value.find(d => d.url === url)
     if (item) {
-      item.progress = progress
+      item.progress = Math.max(item.progress, progress)
     }
   })
 })
@@ -484,10 +484,6 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                       class="h-1.5 rounded-full bg-muted/50 overflow-hidden" 
                       :class="{ 'bg-green-500/20': download.status === 'completed', 'bg-red-500/20': download.status === 'error' }" 
                     />
-                    <div 
-                      v-if="download.status === 'downloading'"
-                      class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
-                    ></div>
                   </div>
                   
                   <p v-if="download.error" class="text-[9px] text-destructive mt-1 font-bold uppercase tracking-tighter flex items-center gap-1">
@@ -791,14 +787,6 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
 </template>
 
 <style scoped>
-@keyframes shimmer {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
-.animate-shimmer {
-  animation: shimmer 1.5s infinite linear;
-}
-
 @keyframes music-bar {
   0%, 100% { height: 30%; }
   50% { height: 100%; }
