@@ -1,4 +1,5 @@
 import animate from "tailwindcss-animate"
+import { fontFamily } from "tailwindcss/defaultTheme"
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -16,6 +17,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Geist Sans", ...fontFamily.sans],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
