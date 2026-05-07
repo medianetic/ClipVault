@@ -47,20 +47,20 @@ ClipVault is a modern, high-performance desktop application built with Electron 
 
 ### Binary Downloads
 
-You can download the latest pre-built binaries for your platform from the [v1.4.2 Release Page](https://github.com/medianetic/ClipVault/releases/tag/v1.4.2).
+You can download the latest pre-built binaries for your platform from the [v1.5.0 Release Page](https://github.com/medianetic/ClipVault/releases/tag/v1.5.0).
 
 #### Windows
-- [**ClipVault-Setup-1.4.2.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-Setup-1.4.2.exe) (Installer)
-- [**ClipVault-1.4.2.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.exe) (Portable)
+- [**ClipVault-Setup-1.5.0.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-Setup-1.5.0.exe) (Installer)
+- [**ClipVault-1.5.0.exe**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.exe) (Portable)
 
 #### macOS
-- [**ClipVault-1.4.2.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.dmg) (Intel & Apple Silicon)
-- [**ClipVault-1.4.2-mac.zip**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2-mac.zip)
+- [**ClipVault-1.5.0.dmg**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.dmg) (Intel & Apple Silicon)
+- [**ClipVault-1.5.0-mac.zip**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0-mac.zip)
 
 #### Linux
-- [**ClipVault-1.4.2.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/ClipVault-1.4.2.AppImage)
-- [**clipvault_1.4.2_amd64.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/clipvault_1.4.2_amd64.deb) (Debian/Ubuntu)
-- [**clipvault-1.4.2.x86_64.rpm**](https://github.com/medianetic/ClipVault/releases/download/v1.4.2/clipvault-1.4.2.x86_64.rpm) (Fedora/RedHat)
+- [**ClipVault-1.5.0.AppImage**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/ClipVault-1.5.0.AppImage)
+- [**clipvault_1.5.0_amd64.deb**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/clipvault_1.5.0_amd64.deb) (Debian/Ubuntu)
+- [**clipvault-1.5.0.x86_64.rpm**](https://github.com/medianetic/ClipVault/releases/download/v1.5.0/clipvault-1.5.0.x86_64.rpm) (Fedora/RedHat)
 
 ### Building from Source
 
