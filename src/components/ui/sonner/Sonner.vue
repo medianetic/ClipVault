@@ -14,7 +14,7 @@ import 'vue-sonner/style.css'
 import { cn } from '@/lib/utils'
 
 const props = withDefaults(defineProps<ToasterProps & { theme?: 'light' | 'dark' | 'system' }>(), {
-  theme: 'auto',
+  theme: 'system',
   position: 'bottom-right',
   expand: true,
 })

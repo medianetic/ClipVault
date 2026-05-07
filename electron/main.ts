@@ -175,12 +175,12 @@ function createWindow() {
   })
   
   autoUpdater.on('update-available', (info) => {
-    logger.info('Update available:', info)
+    logger.info(`Update available: ${JSON.stringify(info)}`)
     win?.webContents.send('update-available', info)
   })
   
   autoUpdater.on('update-not-available', (info) => {
-    logger.info('Update not available:', info)
+    logger.info(`Update not available: ${JSON.stringify(info)}`)
     win?.webContents.send('update-not-available', info)
   })
   
@@ -194,7 +194,7 @@ function createWindow() {
   })
   
   autoUpdater.on('update-downloaded', (info) => {
-    logger.info('Update downloaded:', info)
+    logger.info(`Update downloaded: ${JSON.stringify(info)}`)
     win?.webContents.send('update-downloaded', info)
   })
 

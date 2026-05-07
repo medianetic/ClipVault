@@ -25,8 +25,16 @@ interface Window {
       duration?: number,
       type: 'video' | 'audio'
     }>>
+    checkForUpdates: () => Promise<void>
+    restartAndUpdate: () => Promise<void>
     onBinaryProgress: (callback: (data: { name: string, progress: number }) => void) => () => void
     onDownloadProgress: (callback: (data: { url: string; progress: number }) => void) => () => void
+    onSettingsChanged: (callback: (data: { key: string, value: any }) => void) => () => void
+    onUpdateAvailable: (callback: (info: any) => void) => () => void
+    onUpdateNotAvailable: (callback: (info: any) => void) => () => void
+    onUpdateDownloaded: (callback: (info: any) => void) => () => void
+    onUpdateError: (callback: (err: any) => void) => () => void
+    onUpdateProgress: (callback: (progress: any) => void) => () => void
     minimize: () => Promise<void>
     maximize: () => Promise<void>
     close: () => Promise<void>
