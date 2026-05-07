@@ -1,7 +1,7 @@
 {
   "name": "clipvault",
   "private": true,
-  "version": "1.4.6",
+  "version": "1.5.0",
   "description": "ClipVault - A high-performance Electron frontend for yt-dlp",
   "author": "Nick Weschkalnies",
   "type": "module",
