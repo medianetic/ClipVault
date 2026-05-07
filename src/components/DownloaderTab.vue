@@ -336,7 +336,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
             >
               <Loader2 v-if="loadingMetadata" class="mr-2 h-3.5 w-3.5 animate-spin" />
               <Search v-else class="mr-2 h-3.5 w-3.5" />
-              {{ loadingMetadata ? 'Fetching...' : $t('downloader.fetch_details') }}
+              {{ loadingMetadata ? $t('downloader.fetching') : $t('downloader.fetch_details') }}
             </Button>
           </div>
           <p v-if="error" class="text-destructive text-[10px] mt-2 flex items-center gap-1.5 animate-in slide-in-from-top-1 font-bold pl-1 uppercase tracking-tighter">
@@ -611,7 +611,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                           <Music class="h-10 w-10 text-orange-500 animate-pulse" />
                         </div>
                         <div class="flex flex-col items-center">
-                           <span class="text-[8px] font-black uppercase tracking-[0.3em] text-orange-500/40 mb-1">High Quality Audio</span>
+                           <span class="text-[8px] font-black uppercase tracking-[0.3em] text-orange-500/40 mb-1">{{ $t('downloader.high_quality_audio') }}</span>
                            <div class="flex gap-0.5 items-end h-3">
                              <div class="w-0.5 bg-orange-500/40 rounded-full animate-music-bar-1 h-[40%]"></div>
                              <div class="w-0.5 bg-orange-500/60 rounded-full animate-music-bar-2 h-[70%]"></div>
@@ -637,7 +637,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                       <span class="flex items-center gap-1" :class="{ 'text-orange-500': video.type === 'audio' }">
                         <Music v-if="video.type === 'audio'" class="h-2.5 w-2.5" />
                         <Film v-else class="h-2.5 w-2.5 opacity-50" />
-                        {{ video.type === 'audio' ? 'Audio' : 'Video' }}
+                        {{ video.type === 'audio' ? $t('downloader.type_audio_label') : $t('downloader.type_video_label') }}
                       </span>
                       <span class="opacity-20">•</span>
                       <span class="flex items-center gap-1"><HardDrive class="h-2.5 w-2.5 opacity-50" /> {{ formatFileSize(video.size) }}</span>
@@ -710,7 +710,7 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                 <p class="text-[11px] font-bold truncate text-foreground pr-4" :title="video.name">{{ video.name }}</p>
                 <div class="flex items-center gap-2.5 mt-0.5 opacity-50 text-[8px] font-black uppercase tracking-widest">
                   <span class="flex items-center gap-1" :class="{ 'text-orange-500': video.type === 'audio' }">
-                    {{ video.type === 'audio' ? 'Audio' : 'Video' }}
+                    {{ video.type === 'audio' ? $t('downloader.type_audio_label') : $t('downloader.type_video_label') }}
                   </span>
                   <span class="opacity-30">•</span>
                   <span class="flex items-center gap-1"><HardDrive class="h-2 w-2" /> {{ formatFileSize(video.size) }}</span>

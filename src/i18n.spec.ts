@@ -5,6 +5,7 @@ describe('i18n consistency', () => {
   const messages = i18n.global.messages.value as any
   const en = messages.en
   const de = messages.de
+  const es = messages.es
 
   // Helper function to get all keys of a nested object
   const getAllKeys = (obj: any, prefix = ''): string[] => {
@@ -16,14 +17,19 @@ describe('i18n consistency', () => {
     }, [])
   }
 
-  it('has the same keys for en and de', () => {
+  it('has the same keys for en, de and es', () => {
     const enKeys = getAllKeys(en).sort()
     const deKeys = getAllKeys(de).sort()
+    const esKeys = getAllKeys(es).sort()
 
     // Find missing keys in DE
     const missingInDe = enKeys.filter(k => !deKeys.includes(k))
     // Find missing keys in EN
     const missingInEn = deKeys.filter(k => !enKeys.includes(k))
+    // Find missing keys in ES
+    const missingInEs = enKeys.filter(k => !esKeys.includes(k))
+    // Find extra keys in ES (not in EN)
+    const extraInEs = esKeys.filter(k => !enKeys.includes(k))
 
     if (missingInDe.length > 0) {
       console.error('Keys missing in German:', missingInDe)
@@ -31,9 +37,17 @@ describe('i18n consistency', () => {
     if (missingInEn.length > 0) {
       console.error('Keys missing in English:', missingInEn)
     }
+    if (missingInEs.length > 0) {
+      console.error('Keys missing in Spanish:', missingInEs)
+    }
+    if (extraInEs.length > 0) {
+      console.error('Extra keys in Spanish:', extraInEs)
+    }
 
     expect(missingInDe).toEqual([])
     expect(missingInEn).toEqual([])
+    expect(missingInEs).toEqual([])
+    expect(extraInEs).toEqual([])
   })
 
   it('has valid translation strings (not empty)', () => {

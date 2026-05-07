@@ -15,7 +15,7 @@ const close = () => window.api.close()
 <template>
   <div class="h-10 bg-background/80 backdrop-blur-md border-b border-border/50 flex items-center justify-between select-none px-4 drag-region">
     <div class="flex items-center gap-2">
-      <img src="/public/icon.png" class="h-4 w-4" alt="ClipVault" />
+      <img src="/icon.png" class="h-4 w-4" alt="ClipVault" />
       <span class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">ClipVault</span>
     </div>
 

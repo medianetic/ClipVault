@@ -169,6 +169,11 @@ onMounted(loadSettings)
                   <Globe class="h-3.5 w-3.5 text-yellow-400" /> Deutsch
                 </div>
               </SelectItem>
+              <SelectItem value="es">
+                <div class="flex items-center gap-2 py-0.5">
+                  <Globe class="h-3.5 w-3.5 text-red-500" /> Español
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
