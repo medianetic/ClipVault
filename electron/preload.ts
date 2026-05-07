@@ -27,6 +27,11 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('download-progress', listener)
     return () => ipcRenderer.removeListener('download-progress', listener)
   },
+  onSettingsChanged: (callback: any) => {
+    const listener = (_event: any, value: any) => callback(value)
+    ipcRenderer.on('settings-changed', listener)
+    return () => ipcRenderer.removeListener('settings-changed', listener)
+  },
   minimize: () => ipcRenderer.invoke('window-minimize'),
   maximize: () => ipcRenderer.invoke('window-maximize'),
   close: () => ipcRenderer.invoke('window-close'),

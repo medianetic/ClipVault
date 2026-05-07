@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -60,6 +60,7 @@ const sortBy = ref<'date' | 'name' | 'size'>('date')
 const filterType = ref<'all' | 'video' | 'audio'>('all')
 const videoToDelete = ref<VideoItem | null>(null)
 const isDeleting = ref(false)
+let cleanupSettings: (() => void) | null = null
 
 const fuzzySearch = (text: string, query: string) => {
   const t = text.toLowerCase()
@@ -310,6 +311,16 @@ onMounted(async () => {
       item.progress = Math.max(item.progress, progress)
     }
   })
+
+  cleanupSettings = window.api.onSettingsChanged(({ key }: { key: string }) => {
+    if (key === 'downloadDir') {
+      loadLocalVideos()
+    }
+  })
+})
+
+onUnmounted(() => {
+  if (cleanupSettings) cleanupSettings()
 })
 
 const setViewMode = (mode: 'detailed' | 'compact') => {
@@ -320,6 +331,12 @@ const setViewMode = (mode: 'detailed' | 'compact') => {
 const setSortBy = (sort: 'date' | 'name' | 'size') => {
   sortBy.value = sort
   window.api.setStoreValue('librarySortBy', sort)
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (img.src.includes('/video-placeholder.svg')) return
+  img.src = '/video-placeholder.svg'
 }
 </script>
 
@@ -369,7 +386,11 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
         <Card class="overflow-hidden border border-primary/15 shadow-2xl bg-card/40 backdrop-blur-xl">
           <div class="flex flex-col md:flex-row">
             <div class="md:w-1/4 relative group shrink-0 bg-muted">
-              <img :src="metadata.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover aspect-video md:aspect-auto" />
+              <img 
+                :src="metadata.thumbnail || '/video-placeholder.svg'" 
+                @error="handleImageError"
+                class="w-full h-full object-cover aspect-video md:aspect-auto" 
+              />
               <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                 <div class="bg-black/60 backdrop-blur-md text-white px-2 py-0.5 rounded text-[10px] font-bold border border-border/50">
                   {{ metadata.duration_string }}
@@ -443,7 +464,11 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
             <CardContent class="p-2.5">
               <div class="flex items-center gap-3">
                 <div class="relative w-20 h-11 rounded-lg overflow-hidden flex-shrink-0 bg-muted border border-border/50">
-                  <img :src="download.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover" />
+                  <img 
+                    :src="download.thumbnail || '/video-placeholder.svg'" 
+                    @error="handleImageError"
+                    class="w-full h-full object-cover" 
+                  />
                   <div v-if="download.status === 'downloading'" class="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <Loader2 class="h-4 w-4 text-white animate-spin" />
                   </div>
@@ -608,7 +633,11 @@ const setSortBy = (sort: 'date' | 'name' | 'size') => {
                 <!-- Thumbnail Wrapper (Conditional for Video/Audio) -->
                 <div class="relative aspect-video overflow-hidden cursor-pointer rounded-xl border border-border/50 shadow-inner" @click="openFile(video.path)">
                   <template v-if="video.type === 'video'">
-                    <img :src="video.thumbnail || '/video-placeholder.svg'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img 
+                      :src="video.thumbnail || '/video-placeholder.svg'" 
+                      @error="handleImageError"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                    />
                   </template>
                   <template v-else>
                     <!-- Audio Black Card Design -->

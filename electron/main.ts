@@ -33,12 +33,21 @@ process.on('unhandledRejection', (reason, promise) => {
 app.whenReady().then(() => {
   protocol.handle('thumb', async (request) => {
     try {
-      const encodedPath = request.url.replace('thumb://', '')
+      const url = new URL(request.url)
+      const encodedPath = request.url.replace(`${url.protocol}//`, '')
       let filePath = decodeURIComponent(encodedPath)
       
-      // On Linux/macOS, ensure the path starts with / if it was lost
-      if (process.platform !== 'win32' && !filePath.startsWith('/')) {
-        filePath = '/' + filePath
+      if (process.platform === 'win32') {
+        // Remove leading slash if it exists (e.g. thumb:///C:/...)
+        if (filePath.startsWith('/')) {
+          filePath = filePath.substring(1)
+        }
+        filePath = path.normalize(filePath)
+      } else {
+        // On Linux/macOS, ensure the path starts with / if it was lost
+        if (!filePath.startsWith('/')) {
+          filePath = '/' + filePath
+        }
       }
       
       const data = await fs.readFile(filePath)
@@ -141,7 +150,10 @@ function createWindow() {
   })
 
   ipcMain.handle('get-store-value', (_event, key) => store.get(key))
-  ipcMain.handle('set-store-value', (_event, key, value) => store.set(key, value))
+  ipcMain.handle('set-store-value', (_event, key, value) => {
+    store.set(key, value)
+    win?.webContents.send('settings-changed', { key, value })
+  })
   ipcMain.handle('log-error', (_event, message, error) => logger.error(message, error))
   ipcMain.handle('check-video-exists', (_event, title, format, audioLang) => downloader.checkFileExists(title, store.get('downloadDir') as string, format, audioLang))
   ipcMain.handle('get-suggested-filename', (_event, title, format, audioLang) => downloader.getSuggestedFilename(title, format, audioLang))
