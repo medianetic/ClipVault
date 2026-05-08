@@ -84,18 +84,27 @@ export class Downloader {
       '--output', outputTemplate,
       '--progress',
       '--newline',
-      '--add-metadata'
+      '--add-metadata',
+      '--no-mtime'
     ]
 
     // Construct format string with language priority if specified
     let formatStr = format
     if (audioLang && audioLang !== 'default') {
+      const langs = [audioLang]
+      if (audioLang !== 'en') {
+        langs.push('en')
+      }
+
       if (format === 'best' || format === 'bestvideo+bestaudio') {
-        formatStr = `bestvideo+bestaudio[language=${audioLang}]/bestvideo+bestaudio/best`
+        const priority = langs.map(l => `bestvideo+bestaudio[language^=${l}]/best[language^=${l}]`).join('/')
+        formatStr = `${priority}/bestvideo+bestaudio/best`
       } else if (format === 'mp4') {
-        formatStr = `bestvideo[ext=mp4]+bestaudio[ext=m4a][language=${audioLang}]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
+        const priority = langs.map(l => `bestvideo[ext=mp4]+bestaudio[ext=m4a][language^=${l}]/best[ext=mp4][language^=${l}]`).join('/')
+        formatStr = `${priority}/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
       } else if (format === 'bestaudio') {
-        formatStr = `bestaudio[language=${audioLang}]/bestaudio/best`
+        const priority = langs.map(l => `bestaudio[language^=${l}]/best[language^=${l}]`).join('/')
+        formatStr = `${priority}/bestaudio/best`
       }
     }
 
@@ -140,11 +149,36 @@ export class Downloader {
     let stderr = ''
 
     downloadProcess.stdout.on('data', (data) => {
-      const line = data.toString()
-      const match = line.match(/\[download\]\s+(\d+\.\d+)%/)
-      if (match) {
-        const progress = parseFloat(match[1])
-        win.webContents.send('download-progress', { url, progress })
+      const output = data.toString()
+      const lines = output.split(/[\r\n]+/)
+      
+      for (const line of lines) {
+        if (!line.trim()) continue
+
+        // 1. Match percentage: [download]  10.5% or [download] 100% or [download] ~10.5%
+        const percentMatch = line.match(/\[download\]\s+~?([0-9.]+)%/)
+        if (percentMatch) {
+          const progress = parseFloat(percentMatch[1])
+          win.webContents.send('download-progress', { url, progress })
+          continue
+        }
+
+        // 2. Match fragments: [download] Fragment 10/100
+        const fragMatch = line.match(/Fragment\s+(\d+)\/(\d+)/i)
+        if (fragMatch) {
+          const current = parseInt(fragMatch[1])
+          const total = parseInt(fragMatch[2])
+          if (total > 0) {
+            const progress = (current / total) * 100
+            win.webContents.send('download-progress', { url, progress })
+          }
+          continue
+        }
+
+        // 3. Match post-processing phases
+        if (line.includes('[merger]') || line.includes('[ffmpeg]') || line.includes('[Fixup')) {
+          win.webContents.send('download-progress', { url, progress: 100, status: 'processing' })
+        }
       }
     })
 

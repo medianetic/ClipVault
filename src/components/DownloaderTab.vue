@@ -19,12 +19,14 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle 
 } from '@/components/ui/dialog'
 import { toast } from 'vue-sonner'
+import { LanguageUtils } from '@/lib/languageUtils'
 
 interface VideoItem {
   name: string
   path: string
   size: number
   mtime: Date
+  btime?: Date
   thumbnail?: string | null
   duration?: number
   type: 'video' | 'audio'
@@ -36,7 +38,7 @@ interface DownloadItem {
   title: string
   thumbnail?: string
   progress: number
-  status: 'downloading' | 'completed' | 'error'
+  status: 'downloading' | 'completed' | 'error' | 'processing'
   error?: string
   filePath?: string
   timestamp: Date
@@ -51,6 +53,12 @@ const metadata = ref<any>(null)
 const selectedFormat = ref('best')
 const selectedAudioLang = ref('default')
 const activeDownloads = ref<DownloadItem[]>([])
+
+const availableLanguages = computed(() => {
+  if (!metadata.value || !metadata.value.formats) return []
+  return LanguageUtils.getAvailableLanguageOptions(metadata.value.formats)
+})
+
 const localVideos = ref<VideoItem[]>([])
 const error = ref('')
 
@@ -90,7 +98,9 @@ const filteredVideos = computed(() => {
   // Sort
   result.sort((a, b) => {
     if (sortBy.value === 'date') {
-      return new Date(b.mtime).getTime() - new Date(a.mtime).getTime()
+      const timeA = a.btime ? new Date(a.btime).getTime() : new Date(a.mtime).getTime()
+      const timeB = b.btime ? new Date(b.btime).getTime() : new Date(b.mtime).getTime()
+      return timeB - timeA
     } else if (sortBy.value === 'name') {
       return a.name.localeCompare(b.name)
     } else if (sortBy.value === 'size') {
@@ -305,10 +315,13 @@ onMounted(async () => {
   const defAudioLang = await window.api.getStoreValue('defaultAudioLang')
   if (defAudioLang) selectedAudioLang.value = defAudioLang
 
-  window.api.onDownloadProgress(({ url, progress }) => {
+  window.api.onDownloadProgress(({ url, progress, status }: { url: string, progress: number, status?: any }) => {
     const item = activeDownloads.value.find(d => d.url === url)
     if (item) {
       item.progress = Math.max(item.progress, progress)
+      if (status) {
+        item.status = status
+      }
     }
   })
 
@@ -430,9 +443,9 @@ const handleImageError = (event: Event) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="default">{{ $t('downloader.original_best') }}</SelectItem>
-                      <SelectItem value="en">{{ $t('downloader.lang_en') }}</SelectItem>
-                      <SelectItem value="de">{{ $t('downloader.lang_de') }}</SelectItem>
-                      <SelectItem value="es">{{ $t('downloader.lang_es') }}</SelectItem>
+                      <SelectItem v-for="lang in availableLanguages" :key="lang.code" :value="lang.code">
+                        {{ $t(`downloader.${lang.label}`) }}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -513,7 +526,7 @@ const handleImageError = (event: Event) => {
                         <AlertCircle class="h-3 w-3 mr-1" />
                       </div>
                       <div v-else class="text-[10px] font-black tabular-nums text-primary bg-primary/10 px-2 py-1 rounded-lg tracking-tight">
-                        {{ Math.round(download.progress) }}%
+                        {{ download.status === 'processing' ? $t('downloader.processing') : Math.round(download.progress) + '%' }}
                       </div>
                     </div>
                   </div>

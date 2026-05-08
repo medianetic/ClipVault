@@ -12,6 +12,8 @@ const mockApi = {
   startDownload: vi.fn().mockResolvedValue({ success: true, filePath: '/path/video.mp4' }),
   onDownloadProgress: vi.fn(),
   getStoreValue: vi.fn().mockResolvedValue('en'),
+  onSettingsChanged: vi.fn().mockReturnValue(() => {}),
+  setStoreValue: vi.fn(),
 }
 
 vi.stubGlobal('window', {

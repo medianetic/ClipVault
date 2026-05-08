@@ -184,6 +184,11 @@ onMounted(loadSettings)
                   <Globe class="h-3.5 w-3.5 text-red-500" /> Español
                 </div>
               </SelectItem>
+              <SelectItem value="fr">
+                <div class="flex items-center gap-2 py-0.5">
+                  <Globe class="h-3.5 w-3.5 text-blue-300" /> Français
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -225,6 +230,7 @@ onMounted(loadSettings)
                 <SelectItem value="en">{{ $t('downloader.lang_en') }}</SelectItem>
                 <SelectItem value="de">{{ $t('downloader.lang_de') }}</SelectItem>
                 <SelectItem value="es">{{ $t('downloader.lang_es') }}</SelectItem>
+                <SelectItem value="fr">{{ $t('downloader.lang_fr') }}</SelectItem>
               </SelectContent>
             </Select>
           </div>

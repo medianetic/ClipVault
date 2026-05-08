@@ -262,6 +262,7 @@ function createWindow() {
             path: fullPath,
             size: stats.size,
             mtime: stats.mtime,
+            btime: stats.birthtime,
             thumbnail: thumb ? `thumb://${thumb}` : null,
             duration: metadata?.duration || 0,
             url: metadata?.url || (store.get('videoUrls') as any)?.[fullPath] || null,
@@ -273,8 +274,12 @@ function createWindow() {
 
       const videos = (await Promise.all(videoPromises)).filter((v): v is any => v !== null)
       
-      // Sort by modified time descending
-      return videos.sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
+      // Sort by time descending (preferring birthtime/creation time if available, otherwise mtime)
+      return videos.sort((a, b) => {
+        const timeA = a.btime ? a.btime.getTime() : a.mtime.getTime()
+        const timeB = b.btime ? b.btime.getTime() : b.mtime.getTime()
+        return timeB - timeA
+      })
     } catch (e) {
       logger.error('Failed to list videos', e)
       throw e
