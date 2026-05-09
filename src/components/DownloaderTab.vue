@@ -302,18 +302,11 @@ const deleteVideo = async () => {
 onMounted(async () => {
   loadLocalVideos()
   
-  // Load preferences
-  const mode = await window.api.getStoreValue('libraryViewMode')
-  if (mode) viewMode.value = mode as any
-  
-  const sort = await window.api.getStoreValue('librarySortBy')
-  if (sort) sortBy.value = sort as any
-
-  const defQuality = await window.api.getStoreValue('defaultQuality')
-  if (defQuality) selectedFormat.value = defQuality
-  
-  const defAudioLang = await window.api.getStoreValue('defaultAudioLang')
-  if (defAudioLang) selectedAudioLang.value = defAudioLang
+  // Load preferences (store schema handles defaults)
+  viewMode.value = await window.api.getStoreValue('libraryViewMode')
+  sortBy.value = await window.api.getStoreValue('librarySortBy')
+  selectedFormat.value = await window.api.getStoreValue('defaultQuality')
+  selectedAudioLang.value = await window.api.getStoreValue('defaultAudioLang')
 
   window.api.onDownloadProgress(({ url, progress, status }: { url: string, progress: number, status?: any }) => {
     const item = activeDownloads.value.find(d => d.url === url)

@@ -30,6 +30,7 @@ let cleanupUpdateAvailable: (() => void) | null = null
 let cleanupUpdateNotAvailable: (() => void) | null = null
 let cleanupUpdateDownloaded: (() => void) | null = null
 let cleanupUpdateError: (() => void) | null = null
+let cleanupSettingsChanged: (() => void) | null = null
 
 const { locale, t } = useI18n()
 
@@ -101,15 +102,16 @@ onMounted(async () => {
     }
   })
 
+  // Listen for setting changes
+  cleanupSettingsChanged = window.api.onSettingsChanged(({ key }: { key: string }) => {
+    // Other reactive logic can go here
+  })
+
   // Update listeners
   cleanupUpdateAvailable = window.api.onUpdateAvailable((info: any) => {
-    toast(t('app.update_available'), {
-      description: t('app.update_available_desc', { version: info.version }),
+    toast.info(t('app.update_available'), {
+      description: t('app.update_available_desc', { version: info.version }) + ' ' + t('app.update_downloading'),
       duration: 10000,
-      action: {
-        label: t('app.update_check'),
-        onClick: () => window.api.checkForUpdates()
-      }
     })
   })
 
@@ -124,11 +126,13 @@ onMounted(async () => {
     })
   })
 
-  cleanupUpdateNotAvailable = window.api.onUpdateNotAvailable(() => {
-    toast.info(t('app.update_no_new'), {
-      description: t('app.update_no_new_desc'),
-      duration: 5000
-    })
+  cleanupUpdateNotAvailable = window.api.onUpdateNotAvailable((info: any) => {
+    if (info?.manual) {
+      toast.info(t('app.update_no_new'), {
+        description: t('app.update_no_new_desc'),
+        duration: 5000
+      })
+    }
   })
 
   cleanupUpdateError = window.api.onUpdateError((err: any) => {
@@ -145,11 +149,13 @@ onUnmounted(() => {
   if (cleanupUpdateNotAvailable) cleanupUpdateNotAvailable()
   if (cleanupUpdateDownloaded) cleanupUpdateDownloaded()
   if (cleanupUpdateError) cleanupUpdateError()
+  if (cleanupSettingsChanged) cleanupSettingsChanged()
 })
 </script>
 
 <template>
   <Toaster :theme="currentTheme" />
+  
   <TooltipProvider>
     <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <Titlebar />
@@ -233,7 +239,10 @@ onUnmounted(() => {
               <DownloaderTab />
             </TabsContent>
             
-            <TabsContent value="settings" class="flex-1 overflow-y-auto outline-none animate-in fade-in slide-in-from-right-4 duration-300 m-0 pb-4 h-full">
+            <div 
+              v-show="activeTab === 'settings'"
+              class="flex-1 overflow-y-auto outline-none animate-in fade-in slide-in-from-right-4 duration-300 m-0 pb-4 h-full"
+            >
               <div class="relative bg-card rounded-2xl border shadow-xl overflow-hidden flex flex-col">
                 <div class="flex items-center justify-between p-4 border-b bg-muted/30 flex-shrink-0">
                   <div>
@@ -253,7 +262,7 @@ onUnmounted(() => {
                   <SettingsTab />
                 </div>
               </div>
-            </TabsContent>
+            </div>
           </div>
         </Tabs>
       </div>

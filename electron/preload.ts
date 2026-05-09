@@ -17,7 +17,7 @@ contextBridge.exposeInMainWorld('api', {
   deleteVideo: (filePath: string) => ipcRenderer.invoke('delete-video', filePath),
   deleteBinaries: () => ipcRenderer.invoke('delete-binaries'),
   listVideos: (dirPath?: string) => ipcRenderer.invoke('list-videos', dirPath),
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  checkForUpdates: (manual = false) => ipcRenderer.invoke('check-for-updates', manual),
   restartAndUpdate: () => ipcRenderer.invoke('restart-and-update'),
   onBinaryProgress: (callback: any) => {
     const listener = (_event: any, value: any) => callback(value)

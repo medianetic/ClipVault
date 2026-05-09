@@ -1,7 +1,7 @@
 {
   "name": "clipvault",
   "private": true,
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "ClipVault - A high-performance Electron frontend for yt-dlp",
   "author": "Nick Weschkalnies",
   "type": "module",
@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "electron:build": "electron-builder --config electron-builder.json5",
+    "electron:build": "npm run build && electron-builder --config electron-builder.json5",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:ui": "vitest --ui",

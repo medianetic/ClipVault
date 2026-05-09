@@ -25,7 +25,7 @@ interface Window {
       duration?: number,
       type: 'video' | 'audio'
     }>>
-    checkForUpdates: () => Promise<void>
+    checkForUpdates: (manual?: boolean) => Promise<void>
     restartAndUpdate: () => Promise<void>
     onBinaryProgress: (callback: (data: { name: string, progress: number }) => void) => () => void
     onDownloadProgress: (callback: (data: { url: string; progress: number }) => void) => () => void

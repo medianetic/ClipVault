@@ -19,21 +19,31 @@ const defaultAudioLang = ref('default')
 const autoUpdateCheck = ref(true)
 const isResetting = ref(false)
 const isCheckingUpdates = ref(false)
+const isLoaded = ref(false)
 
 const loadSettings = async () => {
-  downloadDir.value = await window.api.getStoreValue('downloadDir') || ''
-  theme.value = await window.api.getStoreValue('theme') || 'system'
-  appLang.value = await window.api.getStoreValue('language') || 'en'
-  defaultQuality.value = await window.api.getStoreValue('defaultQuality') || 'best'
-  defaultAudioLang.value = await window.api.getStoreValue('defaultAudioLang') || 'default'
-  
-  const savedAutoUpdateCheck = await window.api.getStoreValue('autoUpdateCheck')
-  if (savedAutoUpdateCheck !== undefined) {
-    autoUpdateCheck.value = savedAutoUpdateCheck
+  try {
+    downloadDir.value = await window.api.getStoreValue('downloadDir')
+    theme.value = await window.api.getStoreValue('theme')
+    appLang.value = await window.api.getStoreValue('language')
+    defaultQuality.value = await window.api.getStoreValue('defaultQuality')
+    defaultAudioLang.value = await window.api.getStoreValue('defaultAudioLang')
+    
+    const savedAutoUpdateCheck = await window.api.getStoreValue('checkUpdateOnStartup')
+    
+    // Ensure it's a boolean (store schema should handle this, but being extra safe)
+    autoUpdateCheck.value = savedAutoUpdateCheck === true || savedAutoUpdateCheck === 'true'
+    
+    applyTheme(theme.value)
+    locale.value = appLang.value
+  } catch (error) {
+    console.error('Failed to load settings:', error)
+  } finally {
+    // Small delay to ensure any initial render events have passed
+    setTimeout(() => {
+      isLoaded.value = true
+    }, 100)
   }
-  
-  applyTheme(theme.value)
-  locale.value = appLang.value
 }
 
 const selectDirectory = async () => {
@@ -62,25 +72,30 @@ const applyTheme = (tTheme: string) => {
 }
 
 watch(theme, async (newTheme) => {
+  if (!isLoaded.value) return
   await window.api.setStoreValue('theme', newTheme)
   applyTheme(newTheme)
 })
 
 watch(appLang, async (newLang) => {
+  if (!isLoaded.value) return
   await window.api.setStoreValue('language', newLang)
   locale.value = newLang
 })
 
 watch(defaultQuality, async (val) => {
+  if (!isLoaded.value) return
   await window.api.setStoreValue('defaultQuality', val)
 })
 
 watch(defaultAudioLang, async (val) => {
+  if (!isLoaded.value) return
   await window.api.setStoreValue('defaultAudioLang', val)
 })
 
 watch(autoUpdateCheck, async (val) => {
-  await window.api.setStoreValue('autoUpdateCheck', val)
+  if (!isLoaded.value) return
+  await window.api.setStoreValue('checkUpdateOnStartup', val)
 })
 
 const openExternal = (url: string) => {
@@ -99,9 +114,8 @@ const resetBinaries = async () => {
 const checkForUpdates = async () => {
   isCheckingUpdates.value = true
   try {
-    await window.api.checkForUpdates()
+    await window.api.checkForUpdates(true)
     // We don't need to do anything else here as the listeners in App.vue will handle the response
-    toast.info(t('app.update_downloading').replace('...', ''))
   } catch (e) {
     console.error('Failed to check for updates:', e)
   } finally {
@@ -312,7 +326,8 @@ onMounted(loadSettings)
               {{ $t('settings.auto_update_check') }}
             </label>
             <Switch 
-              v-model:checked="autoUpdateCheck"
+              v-model="autoUpdateCheck"
+              :key="isLoaded ? 'ready' : 'loading'"
             />
           </div>
           <p class="text-[11px] text-muted-foreground mt-2 leading-relaxed">

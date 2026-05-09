@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<ToasterProps & { theme?: 'light' | 'dark'
   theme: 'system',
   position: 'bottom-right',
   expand: true,
+  closeButton: true,
 })
 </script>
 
@@ -45,6 +46,7 @@ const props = withDefaults(defineProps<ToasterProps & { theme?: 'light' | 'dark'
         description: 'text-muted-foreground font-medium',
         actionButton: 'bg-primary text-primary-foreground font-bold rounded-xl',
         cancelButton: 'bg-muted text-muted-foreground font-bold rounded-xl',
+        closeButton: 'bg-background border border-border text-foreground hover:bg-muted transition-colors rounded-full shadow-md',
         success: 'backdrop-blur-xl',
         error: 'backdrop-blur-xl',
       },
