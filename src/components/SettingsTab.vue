@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { FolderOpen, Moon, Sun, Monitor, HardDrive, Palette, Info, ExternalLink, User, Settings2, Globe, RefreshCcw, AlertTriangle } from 'lucide-vue-next'
 import { version } from '../../package.json'
 import { toast } from 'vue-sonner'
@@ -15,6 +16,7 @@ const theme = ref('system')
 const appLang = ref('en')
 const defaultQuality = ref('best')
 const defaultAudioLang = ref('default')
+const autoUpdateCheck = ref(true)
 const isResetting = ref(false)
 const isCheckingUpdates = ref(false)
 
@@ -24,6 +26,12 @@ const loadSettings = async () => {
   appLang.value = await window.api.getStoreValue('language') || 'en'
   defaultQuality.value = await window.api.getStoreValue('defaultQuality') || 'best'
   defaultAudioLang.value = await window.api.getStoreValue('defaultAudioLang') || 'default'
+  
+  const savedAutoUpdateCheck = await window.api.getStoreValue('autoUpdateCheck')
+  if (savedAutoUpdateCheck !== undefined) {
+    autoUpdateCheck.value = savedAutoUpdateCheck
+  }
+  
   applyTheme(theme.value)
   locale.value = appLang.value
 }
@@ -69,6 +77,10 @@ watch(defaultQuality, async (val) => {
 
 watch(defaultAudioLang, async (val) => {
   await window.api.setStoreValue('defaultAudioLang', val)
+})
+
+watch(autoUpdateCheck, async (val) => {
+  await window.api.setStoreValue('autoUpdateCheck', val)
 })
 
 const openExternal = (url: string) => {
@@ -291,6 +303,17 @@ onMounted(loadSettings)
               <RefreshCcw class="mr-1.5 h-3 w-3" :class="{ 'animate-spin': isCheckingUpdates }" />
               {{ $t('app.update_check') }}
             </Button>
+          </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
+            <label 
+              class="text-[11px] font-medium text-foreground/80 cursor-pointer select-none"
+              @click="autoUpdateCheck = !autoUpdateCheck"
+            >
+              {{ $t('settings.auto_update_check') }}
+            </label>
+            <Switch 
+              v-model:checked="autoUpdateCheck"
+            />
           </div>
           <p class="text-[11px] text-muted-foreground mt-2 leading-relaxed">
             {{ $t('settings.desc') }}

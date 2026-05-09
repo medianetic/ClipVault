@@ -200,7 +200,10 @@ function createWindow() {
 
   // Start checking for updates after window is created
   if (!VITE_DEV_SERVER_URL) {
-    autoUpdater.checkForUpdatesAndNotify()
+    const autoCheckUpdates = store.get('autoUpdateCheck', true)
+    if (autoCheckUpdates) {
+      autoUpdater.checkForUpdatesAndNotify()
+    }
   }
   ipcMain.handle('log-error', (_event, message, error) => logger.error(message, error))
   ipcMain.handle('check-video-exists', (_event, title, format, audioLang) => downloader.checkFileExists(title, store.get('downloadDir') as string, format, audioLang))
