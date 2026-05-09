@@ -103,7 +103,7 @@ onMounted(async () => {
   })
 
   // Listen for setting changes
-  cleanupSettingsChanged = window.api.onSettingsChanged(({ key }: { key: string }) => {
+  cleanupSettingsChanged = window.api.onSettingsChanged(() => {
     // Other reactive logic can go here
   })
 
