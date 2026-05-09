@@ -12,7 +12,7 @@ export class Downloader {
   async getMetadata(url: string) {
     return new Promise((resolve, reject) => {
       const ytDlpPath = this.binaryManager.getYTIDlpPath()
-      const process = spawn(ytDlpPath, ['--dump-json', '--flat-playlist', url])
+      const process = spawn(ytDlpPath, ['--dump-json', '--flat-playlist', '--no-warnings', url])
       
       let stdout = ''
       let stderr = ''
@@ -28,9 +28,12 @@ export class Downloader {
       process.on('close', (code) => {
         if (code === 0) {
           try {
-            resolve(JSON.parse(stdout))
+            // Find the start of the actual JSON if there's any stray output
+            const jsonStartIndex = stdout.indexOf('{')
+            const cleanOutput = jsonStartIndex !== -1 ? stdout.substring(jsonStartIndex) : stdout
+            resolve(JSON.parse(cleanOutput))
           } catch (e) {
-            logger.error(`Failed to parse metadata for URL: ${url}`, e)
+            logger.error(`Failed to parse metadata for URL: ${url}`, { error: e, stdout })
             reject(new Error('Failed to parse metadata'))
           }
           } else {
@@ -159,7 +162,9 @@ export class Downloader {
         const percentMatch = line.match(/\[download\]\s+~?([0-9.]+)%/)
         if (percentMatch) {
           const progress = parseFloat(percentMatch[1])
-          win.webContents.send('download-progress', { url, progress })
+          if (!win.isDestroyed()) {
+            win.webContents.send('download-progress', { url, progress })
+          }
           continue
         }
 
@@ -170,14 +175,18 @@ export class Downloader {
           const total = parseInt(fragMatch[2])
           if (total > 0) {
             const progress = (current / total) * 100
-            win.webContents.send('download-progress', { url, progress })
+            if (!win.isDestroyed()) {
+              win.webContents.send('download-progress', { url, progress })
+            }
           }
           continue
         }
 
         // 3. Match post-processing phases
         if (line.includes('[merger]') || line.includes('[ffmpeg]') || line.includes('[Fixup')) {
-          win.webContents.send('download-progress', { url, progress: 100, status: 'processing' })
+          if (!win.isDestroyed()) {
+            win.webContents.send('download-progress', { url, progress: 100, status: 'processing' })
+          }
         }
       }
     })

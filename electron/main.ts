@@ -99,14 +99,18 @@ function registerIpcHandlers() {
   
   ipcMain.handle('download-yt-dlp', async () => {
     await binaryManager.downloadYTIDlp((progress) => {
-      win?.webContents.send('binary-progress', { name: 'yt-dlp', progress })
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('binary-progress', { name: 'yt-dlp', progress })
+    }
     })
     return true
   })
 
   ipcMain.handle('download-ffmpeg', async () => {
     await binaryManager.downloadFFmpeg((progress) => {
-      win?.webContents.send('binary-progress', { name: 'ffmpeg', progress })
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('binary-progress', { name: 'ffmpeg', progress })
+      }
     })
     return true
   })
@@ -160,7 +164,9 @@ function registerIpcHandlers() {
     try {
       logger.info(`Set store value: ${key} = ${value}`)
       store.set(key, value)
-      win?.webContents.send('settings-changed', { key, value })
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('settings-changed', { key, value })
+      }
     } catch (e) {
       logger.error(`Failed to set store value for ${key}`, e)
     }
@@ -168,7 +174,9 @@ function registerIpcHandlers() {
   
   ipcMain.handle('check-for-updates', (_event, manual = false) => {
     if (!app.isPackaged) {
-      win?.webContents.send('update-error', { message: 'Update check is only available in the packaged application.' })
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('update-error', { message: 'Update check is only available in the packaged application.' })
+      }
       return
     }
     
@@ -273,7 +281,9 @@ function registerUpdaterEvents() {
   
   autoUpdater.on('update-available', (info) => {
     logger.info(`Update available: ${JSON.stringify(info)}`)
-    win?.webContents.send('update-available', info)
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-available', info)
+    }
   })
   
   autoUpdater.on('update-not-available', (info) => {
@@ -283,21 +293,29 @@ function registerUpdaterEvents() {
     // @ts-ignore
     autoUpdater._isManualCheck = false
     
-    win?.webContents.send('update-not-available', { ...info, manual: isManual })
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-not-available', { ...info, manual: isManual })
+    }
   })
   
   autoUpdater.on('error', (err) => {
     logger.error('Error in auto-updater:', err)
-    win?.webContents.send('update-error', err)
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-error', err)
+    }
   })
   
   autoUpdater.on('download-progress', (progressObj) => {
-    win?.webContents.send('update-download-progress', progressObj)
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-download-progress', progressObj)
+    }
   })
   
   autoUpdater.on('update-downloaded', (info) => {
     logger.info(`Update downloaded: ${JSON.stringify(info)}`)
-    win?.webContents.send('update-downloaded', info)
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('update-downloaded', info)
+    }
   })
 }
 
